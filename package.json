@@ -1,0 +1,36 @@
+{
+  "name": "social-network-server",
+  "version": "0.1.0",
+  "license": "ISC",
+  "scripts": {
+    "start": "node ./bin/www",
+    "server": "nodemon ./bin/www",
+    "client": "npm start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "dependencies": {
+    "@hapi/joi": "^16.1.8",
+    "bcryptjs": "^2.4.3",
+    "concurrently": "^4.1.0",
+    "debug": "~2.6.9",
+    "dotenv": "^6.2.0",
+    "express": "~4.16.0",
+    "express-rate-limit": "^5.0.0",
+    "form-data": "^2.3.3",
+    "helmet": "^3.16.0",
+    "http-errors": "~1.6.2",
+    "jimp": "^0.6.8",
+    "joi-objectid": "^3.0.1",
+    "jsonwebtoken": "^8.5.1",
+    "linkifyjs": "^2.1.8",
+    "moment": "^2.24.0",
+    "mongoose": "^5.4.6",
+    "morgan": "~1.9.0",
+    "multer": "^1.4.1",
+    "nodemailer": "^6.4.2",
+    "nodemailer-express-handlebars": "^3.1.0",
+    "react-autosuggest": "^9.4.3",
+    "socket.io": "^2.2.0",
+    "uuid": "^3.3.2"
+  }
+}
