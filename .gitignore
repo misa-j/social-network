@@ -9,12 +9,16 @@ client/README.md
 
 public/images/chat-images/*
 !public/images/chat-images/placeholder.png
+
 public/images/post-images/*
 !public/images/post-images/placeholder.png
+!public/images/post-images/thumbnail
+public/images/post-images/thumbnail/*
+!public/images/post-images/thumbnail/placeholder.png
+
 public/images/profile-picture/*
 !public/images/profile-picture/100x100
 !public/images/profile-picture/person.png
 public/images/profile-picture/100x100/*
 !public/images/profile-picture/100x100/person.png
-public/images/post-images/thumbnail/*
-!public/images/post-images/thumbnail/placeholder.png
+
