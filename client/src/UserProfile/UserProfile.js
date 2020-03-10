@@ -101,7 +101,7 @@ class UserProfile extends Component {
             trigger={
               <div className="gallery-item">
                 <img
-                  src={`/images/post-images/${post.photo}`}
+                  src={`/images/post-images/thumbnail/${post.photo}`}
                   className="gallery-image"
                   alt=""
                 />

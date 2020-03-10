@@ -16,30 +16,39 @@ const notificationHandler = require("../handlers/notificationHandler");
 const sendVerificationEmail = require("../handlers/sendVerificationEmail");
 const messageHandler = require("../handlers/messageHandler");
 
+// Check File Type
+function checkFileType(file, cb) {
+  // Allowed ext
+  const filetypes = /jpeg|jpg|png|gif/;
+  // Check ext
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  // Check mime
+  const mimetype = filetypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb(new Error("Only images are allowed"));
+  }
+}
+
 const storage = multer.diskStorage({
   //multers disk storage settings
   destination: (req, file, cb) => {
     cb(null, "./public/images/profile-picture/");
   },
   filename: (req, file, cb) => {
-    cb(
-      null,
-      uuidv4() +
-        "." +
-        file.originalname.split(".")[file.originalname.split(".").length - 1]
-    );
+    const ext = file.mimetype.split("/")[1];
+
+    cb(null, uuidv4() + "." + ext);
   }
 });
 
 const upload = multer({
   //multer settings
   storage: storage,
-  fileFilter: (req, file, callback) => {
-    const ext = path.extname(file.originalname);
-    if (ext !== ".png" && ext !== ".jpg" && ext !== ".gif" && ext !== ".jpeg") {
-      return callback(new Error("Only images are allowed"));
-    }
-    callback(null, true);
+  fileFilter: function(req, file, cb) {
+    checkFileType(file, cb);
   },
   limits: {
     fileSize: 1024 * 1024

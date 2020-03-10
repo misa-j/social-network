@@ -5,6 +5,7 @@ const User = mongoose.model("User");
 const PostLike = mongoose.model("PostLike");
 const Notification = mongoose.model("Notification");
 const Comment = mongoose.model("Comment");
+const Jimp = require("jimp");
 const path = require("path");
 const uuidv4 = require("uuid/v4");
 const multer = require("multer");
@@ -40,6 +41,22 @@ const postLookup = [
   }
 ];
 
+// Check File Type
+function checkFileType(file, cb) {
+  // Allowed ext
+  const filetypes = /jpeg|jpg|png|gif/;
+  // Check ext
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  // Check mime
+  const mimetype = filetypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb(new Error("Only images are allowed"));
+  }
+}
+
 function arrayRemove(array, value) {
   return array.filter(item => {
     return item._id.toString() !== value.toString();
@@ -52,29 +69,41 @@ const storage = multer.diskStorage({
     cb(null, "./public/images/post-images/");
   },
   filename: (req, file, cb) => {
-    cb(
-      null,
-      uuidv4() +
-        "." +
-        file.originalname.split(".")[file.originalname.split(".").length - 1]
-    );
+    const ext = file.mimetype.split("/")[1];
+
+    cb(null, uuidv4() + "." + ext);
   }
 });
 
 const upload = multer({
   //multer settings
   storage: storage,
-  fileFilter: (req, file, callback) => {
-    const ext = path.extname(file.originalname);
-    if (ext !== ".png" && ext !== ".jpg" && ext !== ".gif" && ext !== ".jpeg") {
-      return callback(new Error("Only images are allowed"));
-    }
-    callback(null, true);
+  fileFilter: function(req, file, cb) {
+    checkFileType(file, cb);
   },
   limits: {
     fileSize: 10485760 //10 MB
   }
 }).single("photo");
+
+exports.upload = async (req, res, next) => {
+  upload(req, res, err => {
+    if (err) return res.status(400).json({ message: err.message });
+
+    if (!req.file)
+      return res.status(400).json({ message: "Please upload a file" });
+
+    req.body.photo = req.file.filename;
+    Jimp.read(req.file.path, function(err, test) {
+      if (err) throw err;
+      test
+        .scaleToFit(480, Jimp.AUTO, Jimp.RESIZE_BEZIER)
+        .quality(50)
+        .write("./public/images/post-images/thumbnail/" + req.body.photo);
+      next();
+    });
+  });
+};
 
 exports.getPosts = (req, res) => {
   let query;
@@ -412,18 +441,6 @@ exports.getPost = (req, res) => {
       res.status(200).json({ post });
     })
     .catch(err => res.status(500).json({ message: err.message }));
-};
-
-exports.upload = async (req, res, next) => {
-  upload(req, res, err => {
-    if (err) return res.status(400).json({ message: err.message });
-
-    if (!req.file)
-      return res.status(400).json({ message: "Please upload a file" });
-
-    req.body.photo = req.file.filename;
-    next();
-  });
 };
 
 exports.createPost = (req, res) => {

@@ -1,5 +1,12 @@
 import React, { Component } from "react";
-import { Icon, Button, Dropdown, Modal } from "semantic-ui-react";
+import {
+  Icon,
+  Button,
+  Dropdown,
+  Modal,
+  Segment,
+  Image
+} from "semantic-ui-react";
 import { connect } from "react-redux";
 import { postActions } from "../../actions/postActions";
 import { commentActions } from "../../actions/commentActions";
@@ -41,6 +48,7 @@ const linkifyOptions = {
 class Post extends Component {
   state = {
     open: false,
+    loadedImg: false,
     value: "",
     showTags: false,
     optionsLoggedIn: [
@@ -237,8 +245,15 @@ class Post extends Component {
         </div>
 
         <div className="post-image">
+          {this.state.loadedImg ? null : (
+            <Segment loading>
+              <Image src={`/images/post-images/thumbnail/${post.photo}`} />
+            </Segment>
+          )}
           <img
             onClick={this.handleToggleTags}
+            onLoad={() => this.setState({ loadedImg: true })}
+            style={this.state.loadedImg ? {} : { display: "none" }}
             src={`/images/post-images/${post.photo}`}
             alt=""
           />

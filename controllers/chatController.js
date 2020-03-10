@@ -7,29 +7,38 @@ const path = require("path");
 const uuidv4 = require("uuid/v4");
 const multer = require("multer");
 
+// Check File Type
+function checkFileType(file, cb) {
+  // Allowed ext
+  const filetypes = /jpeg|jpg|png|gif/;
+  // Check ext
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  // Check mime
+  const mimetype = filetypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb(new Error("Only images are allowed"));
+  }
+}
+
 const storage = multer.diskStorage({
   //multers disk storage settings
   destination: (req, file, cb) => {
     cb(null, "./public/images/chat-images/");
   },
   filename: (req, file, cb) => {
-    cb(
-      null,
-      uuidv4() +
-        "." +
-        file.originalname.split(".")[file.originalname.split(".").length - 1]
-    );
+    const ext = file.mimetype.split("/")[1];
+    cb(null, uuidv4() + "." + ext);
   }
 });
 
 const upload = multer({
   //multer settings
   storage: storage,
-  fileFilter: (req, file, callback) => {
-    const ext = path.extname(file.originalname);
-    if (ext !== ".png" && ext !== ".jpg" && ext !== ".gif" && ext !== ".jpeg") {
-      return callback(new Error("Only images are allowed"));
-    }
+  fileFilter: function(req, file, cb) {
+    checkFileType(file, cb);
     messageHandler.sendImageMessageRequest(req, {
       message: {
         sender: req.userData.userId,
@@ -39,7 +48,6 @@ const upload = multer({
       },
       receiver: JSON.parse(req.body.receiver)
     });
-    callback(null, true);
   },
   limits: {
     fileSize: 10485760 //10 MB
