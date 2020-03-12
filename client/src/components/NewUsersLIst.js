@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
 import { Link } from "react-router-dom";
-import { List, Image, Dimmer, Loader } from "semantic-ui-react";
+import { List, Image, Dimmer, Loader, Button } from "semantic-ui-react";
 import { connect } from "react-redux";
 import { userActions } from "../actions/userActions";
 import dayjs from "dayjs";
@@ -12,12 +12,25 @@ class NewUsersList extends Component {
   componentDidMount = () => {
     const { dispatch, newUsers } = this.props;
     if (!newUsers.users.length) {
-      dispatch(userActions.getNewUsers());
+      dispatch(userActions.getNewUsers({ initialFetch: true }));
+    }
+  };
+
+  fetchMoreUsers = () => {
+    const {
+      dispatch,
+      newUsers: { users, fetchingNewUsers }
+    } = this.props;
+
+    if (!fetchingNewUsers) {
+      const lastId = users[users.length - 1]._id;
+      dispatch(userActions.getNewUsers({ initialFetch: false, lastId }));
     }
   };
 
   render() {
     const { newUsers, username } = this.props;
+
     const users = newUsers.users.map(user => {
       return (
         <List.Item key={user._id}>
@@ -49,6 +62,15 @@ class NewUsersList extends Component {
             </Dimmer>
           ) : null}
           {users}
+          {newUsers.usersCount - newUsers.users.length ? (
+            <Button
+              fluid
+              loading={newUsers.fetchingNewUsers}
+              onClick={() => this.fetchMoreUsers()}
+            >
+              More users
+            </Button>
+          ) : null}
         </List>
       </Fragment>
     );

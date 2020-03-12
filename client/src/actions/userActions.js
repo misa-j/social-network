@@ -29,11 +29,14 @@ function logout() {
   };
 }
 
-function getNewUsers() {
+function getNewUsers(params) {
   return dispatch => {
-    userService.getNewUsers().then(
+    if (!params.initialFetch) {
+      dispatch(request());
+    }
+    userService.getNewUsers(params).then(
       res => {
-        dispatch(success(res.users));
+        dispatch(success({ ...res, ...params }));
       },
       error => {
         console.log(error);
@@ -41,8 +44,11 @@ function getNewUsers() {
     );
   };
 
-  function success(users) {
-    return { type: userConstants.GET_NEW_USERS_SUCCESS, users };
+  function success(data) {
+    return { type: userConstants.GET_NEW_USERS_SUCCESS, data };
+  }
+  function request() {
+    return { type: userConstants.GET_NEW_USERS_REQUEST };
   }
 }
 

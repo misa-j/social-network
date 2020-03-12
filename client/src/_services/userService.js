@@ -29,10 +29,11 @@ function login(email, password) {
     });
 }
 
-function getNewUsers() {
+function getNewUsers(params) {
   const requestOptions = {
-    method: "GET",
-    headers: { "Content-Type": "application/json" }
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...params })
   };
 
   return fetch("/api/user/getNewUsers", requestOptions)

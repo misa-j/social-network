@@ -15,12 +15,17 @@ router.post(
   userController.sendUserData
 );
 
-router.get("/getNewUsers", userController.getNewUsers);
+router.post(
+  "/getNewUsers",
+  userValidator.getNewUsers,
+  userController.getNewUsers
+);
 
 router.get("/email/activate/:token", userController.activate);
 
 router.post(
   "/sendVerificationEmail",
+
   userValidator.sendVerificationEmail,
   userController.sendVerificationEmail
 );

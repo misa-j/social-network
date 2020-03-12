@@ -222,7 +222,7 @@ exports.addUser = (req, res) => {
               });
             })
             .catch(err => {
-              res.status(500).json({ message: err.message });
+              return res.status(500).json({ message: err.message });
             });
         }
       });
@@ -584,16 +584,33 @@ exports.followUser = (req, res) => {
 };
 
 exports.getNewUsers = (req, res) => {
-  User.find()
-    .select("username date profilePicture")
-    .sort({ date: -1 })
-    .limit(30)
-    .then(response => res.status(200).json({ users: response }))
-    .catch(err => {
-      res.status(500).json({
-        message: err.message
+  if (req.body.initialFetch) {
+    const usersCount = User.find({}).countDocuments();
+    const users = User.find()
+      .select("username date profilePicture")
+      .sort({ date: -1 })
+      .limit(30);
+
+    Promise.all([usersCount, users])
+      .then(response => {
+        const [usersCount, users] = response;
+        res.status(200).json({ usersCount, users });
+      })
+      .catch(err => {
+        return res.status(500).json({
+          message: err.message
+        });
       });
-    });
+  } else {
+    User.find({ _id: { $lt: req.body.lastId } })
+      .select("username date profilePicture")
+      .sort({ date: -1 })
+      .limit(30)
+      .then(users => {
+        return res.status(200).json({ users });
+      })
+      .catch(err => res.status(500).json({ message: err.message }));
+  }
 };
 
 exports.getUserProfileData = (req, res, next) => {
@@ -741,7 +758,7 @@ exports.getPosts = (req, res) => {
     }
   ])
     .then(posts => {
-      res.status(200).json({ posts });
+      return res.status(200).json({ posts });
     })
     .catch(err => res.status(500).json({ message: err.message }));
 };
@@ -817,7 +834,7 @@ exports.searchUsersByUsername = (req, res) => {
       .limit(10)
       .select("username profilePicture firstName lastName ")
       .then(users => {
-        res.status(200).json({ users });
+        return res.status(200).json({ users });
       })
       .catch(err => res.status(500).json({ message: err.message }));
   }
@@ -854,7 +871,7 @@ exports.getUserProfileFollowers = (req, res) => {
     .populate("followers.user", "username profilePicture ")
     .select("followers.user")
     .then(users => {
-      res.status(200).json({ users });
+      return res.status(200).json({ users });
     })
     .catch(err => res.status(500).json({ message: err.message }));
 };
@@ -865,7 +882,7 @@ exports.getUserProfileFollowings = (req, res) => {
     .populate("following.user", "username profilePicture ")
     .select("following.user.email")
     .then(users => {
-      res.status(200).json({ users });
+      return res.status(200).json({ users });
     })
     .catch(err => res.status(500).json({ message: err.message }));
 };

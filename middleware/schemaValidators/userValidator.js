@@ -56,6 +56,23 @@ exports.addUser = (req, res, next) => {
   next();
 };
 
+exports.getNewUsers = (req, res, next) => {
+  const schema = Joi.object({
+    initialFetch: Joi.boolean().required(),
+    lastId: Joi.when("initialFetch", {
+      is: false,
+      then: Joi.objectId().required(),
+      otherwise: Joi.forbidden()
+    })
+  });
+
+  const { error, value } = schema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.message });
+  }
+  next();
+};
+
 exports.sendVerificationEmail = (req, res, next) => {
   const schema = Joi.object({
     email: Joi.string()

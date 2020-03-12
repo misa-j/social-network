@@ -16,7 +16,6 @@
     "dotenv": "^6.2.0",
     "express": "~4.16.0",
     "express-rate-limit": "^5.0.0",
-    "form-data": "^2.3.3",
     "helmet": "^3.16.0",
     "http-errors": "~1.6.2",
     "jimp": "^0.6.8",
