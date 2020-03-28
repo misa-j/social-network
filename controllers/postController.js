@@ -550,19 +550,30 @@ exports.createPost = (req, res) => {
     });
 };
 
+function deletePostPhoto({ photo }) {
+  fs.unlink("./public/images/post-images/" + photo, err => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log("removed");
+  });
+
+  fs.unlink("./public/images/post-images/thumbnail/" + photo, err => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log("removed");
+  });
+}
+
 exports.deletePost = (req, res) => {
   Post.findOneAndDelete({ _id: req.body.postId, author: req.userData.userId })
     .then(post => {
       if (!post) return res.status(401).json({ message: "Failed to delete" });
 
-      fs.unlink("./public/images/post-images/" + post.photo, err => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        console.log("removed");
-        //file removed
-      });
+      deletePostPhoto(post);
 
       Comment.deleteMany({
         post: mongoose.Types.ObjectId(post._id)
