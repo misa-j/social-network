@@ -38,9 +38,8 @@ const linkifyOptions = {
     return href;
   },
   attributes: {
-    onClick: event => {
-      event.preventDefault();
-      history.push(event.target.pathname);
+    target: {
+      url: "_blank"
     }
   }
 };

@@ -14,7 +14,6 @@ import { userActions } from "../actions/userActions";
 import Post from "../components/Post/Post";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { FollowButton } from "../components/FollowButton";
-import { history } from "../_helpers/history";
 import Messages from "../components/Messages";
 import Linkify from "linkifyjs/react";
 import * as linkify from "linkifyjs";
@@ -36,9 +35,8 @@ const linkifyOptions = {
     return href;
   },
   attributes: {
-    onClick: event => {
-      event.preventDefault();
-      history.push(event.target.pathname);
+    target: {
+      url: "_blank"
     }
   }
 };

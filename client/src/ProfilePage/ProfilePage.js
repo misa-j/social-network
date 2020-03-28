@@ -15,7 +15,6 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { userActions } from "../actions/userActions";
 import { EditProfileModal } from "../components/EditProfileModal";
 import Messages from "../components/Messages";
-import { history } from "../_helpers/history";
 import Linkify from "linkifyjs/react";
 import * as linkify from "linkifyjs";
 import hashtag from "linkifyjs/plugins/hashtag";
@@ -37,9 +36,8 @@ const linkifyOptions = {
     return href;
   },
   attributes: {
-    onClick: event => {
-      event.preventDefault();
-      history.push(event.target.pathname);
+    target: {
+      url: "_blank"
     }
   }
 };

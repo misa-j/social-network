@@ -4,7 +4,6 @@ import Linkify from "linkifyjs/react";
 import * as linkify from "linkifyjs";
 import hashtag from "linkifyjs/plugins/hashtag";
 import mention from "linkifyjs/plugins/mention";
-import { history } from "../_helpers/history";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -24,13 +23,9 @@ const linkifyOptions = {
     return href;
   },
   attributes: {
-    onClick: event => {
-      event.preventDefault();
-      history.push(event.target.pathname);
+    target: {
+      url: "_blank"
     }
-  },
-  target: {
-    url: "_blank"
   }
 };
 

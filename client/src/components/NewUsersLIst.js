@@ -62,7 +62,7 @@ class NewUsersList extends Component {
             </Dimmer>
           ) : null}
           {users}
-          {newUsers.usersCount - newUsers.users.length ? (
+          {newUsers.usersCount - newUsers.users.length !== 0 ? (
             <Button
               fluid
               loading={newUsers.fetchingNewUsers}

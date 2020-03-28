@@ -5,7 +5,6 @@ import { connect } from "react-redux";
 import { commentActions } from "../../actions/commentActions";
 import CommentReplies from "../CommentReplies/CommentReplies";
 import LikeComment from "./LikeComment";
-import { history } from "../../_helpers/history";
 import TextInput from "react-autocomplete-input";
 import "react-autocomplete-input/dist/bundle.css";
 import { debounce } from "throttle-debounce";
@@ -48,9 +47,8 @@ const linkifyOptions = {
     return href;
   },
   attributes: {
-    onClick: event => {
-      event.preventDefault();
-      history.push(event.target.pathname);
+    target: {
+      url: "_blank"
     }
   }
 };
