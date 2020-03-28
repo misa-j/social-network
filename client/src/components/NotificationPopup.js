@@ -34,7 +34,10 @@ function postLikeNotification({ _id, createdAt, sender, post }) {
         </Feed.Summary>
         <Feed.Extra images>
           <Link to={`/p/${post[0]._id}`}>
-            <Image rounded src={`/images/post-images/${post[0].photo}`} />
+            <Image
+              rounded
+              src={`/images/post-images/thumbnail/${post[0].photo}`}
+            />
           </Link>
         </Feed.Extra>
       </Feed.Content>
@@ -60,7 +63,10 @@ function commentLikeNotification({ _id, createdAt, sender, comment, post }) {
         </Feed.Summary>
         <Feed.Extra images>
           <Link to={`/p/${post[0]._id}`}>
-            <Image rounded src={`/images/post-images/${post[0].photo}`} />
+            <Image
+              rounded
+              src={`/images/post-images/thumbnail/${post[0].photo}`}
+            />
           </Link>
         </Feed.Extra>
       </Feed.Content>
@@ -86,7 +92,10 @@ function likeCommentReplyNotification({ _id, createdAt, sender, reply, post }) {
         </Feed.Summary>
         <Feed.Extra images>
           <Link to={`/p/${post[0]._id}`}>
-            <Image rounded src={`/images/post-images/${post[0].photo}`} />
+            <Image
+              rounded
+              src={`/images/post-images/thumbnail/${post[0].photo}`}
+            />
           </Link>
         </Feed.Extra>
       </Feed.Content>
@@ -111,7 +120,10 @@ function postTaggedNotification({ _id, createdAt, sender, post }) {
         </Feed.Summary>
         <Feed.Extra images>
           <Link to={`/p/${post[0]._id}`}>
-            <Image rounded src={`/images/post-images/${post[0].photo}`} />
+            <Image
+              rounded
+              src={`/images/post-images/thumbnail/${post[0].photo}`}
+            />
           </Link>
         </Feed.Extra>
       </Feed.Content>
@@ -136,7 +148,10 @@ function commentTaggedNotification({ _id, createdAt, sender, post }) {
         </Feed.Summary>
         <Feed.Extra images>
           <Link to={`/p/${post[0]._id}`}>
-            <Image rounded src={`/images/post-images/${post[0].photo}`} />
+            <Image
+              rounded
+              src={`/images/post-images/thumbnail/${post[0].photo}`}
+            />
           </Link>
         </Feed.Extra>
       </Feed.Content>
@@ -162,7 +177,10 @@ function addCommentNotification({ _id, createdAt, sender, comment, post }) {
         </Feed.Summary>
         <Feed.Extra images>
           <Link to={`/p/${post[0]._id}`}>
-            <Image rounded src={`/images/post-images/${post[0].photo}`} />
+            <Image
+              rounded
+              src={`/images/post-images/thumbnail/${post[0].photo}`}
+            />
           </Link>
         </Feed.Extra>
       </Feed.Content>
@@ -215,7 +233,10 @@ function commentReplyNotification({
         </Feed.Summary>
         <Feed.Extra images>
           <Link to={`/p/${post[0]._id}`}>
-            <Image rounded src={`/images/post-images/${post[0].photo}`} />
+            <Image
+              rounded
+              src={`/images/post-images/thumbnail/${post[0].photo}`}
+            />
           </Link>
         </Feed.Extra>
       </Feed.Content>

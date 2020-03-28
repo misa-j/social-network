@@ -54,7 +54,7 @@ class LocationPage extends Component {
         <Link to={"/p/" + post._id} key={post._id}>
           <div className="gallery-item">
             <img
-              src={`/images/post-images/${post.photo}`}
+              src={`/images/post-images/thumbnail/${post.photo}`}
               className="gallery-image"
               alt=""
             />
