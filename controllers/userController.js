@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const path = require("path");
+const fs = require("fs");
 const Jimp = require("jimp");
 const uuidv4 = require("uuid/v4");
 const bcrypt = require("bcryptjs");
@@ -74,15 +75,45 @@ exports.upload = (req, res, next) => {
   });
 };
 
+function deleteProfilePicture({ photo }) {
+  fs.unlink("./public/images/profile-picture/" + photo, err => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log("removed");
+  });
+
+  fs.unlink("./public/images/profile-picture/100x100/" + photo, err => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log("removed");
+  });
+}
+
 exports.changeProfilePicture = (req, res) => {
-  User.findOneAndUpdate(
-    { _id: req.userData.userId },
-    { profilePicture: req.body.photo },
-    { new: true }
-  )
+  User.findById(req.userData.userId)
     .select("profilePicture")
-    .then(user => {
-      return res.status(200).json({ user });
+    .then(data => {
+      if (data.profilePicture !== "person.png") {
+        deleteProfilePicture({ photo: data.profilePicture });
+      }
+
+      User.findOneAndUpdate(
+        { _id: req.userData.userId },
+        { profilePicture: req.body.photo },
+        { new: true }
+      )
+        .select("profilePicture")
+        .then(user => {
+          return res.status(200).json({ user });
+        })
+        .catch(err => {
+          console.log(err);
+          return res.status(500).json({ message: err.message });
+        });
     })
     .catch(err => {
       console.log(err);
