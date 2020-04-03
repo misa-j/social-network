@@ -475,6 +475,13 @@ img {
   grid-area: sidebar;
 }
 
+.content > a {
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden !important;
+  text-overflow: ellipsis;
+}
+
 #left-container p {
   font-size: 2rem;
   padding-bottom: 10%;
