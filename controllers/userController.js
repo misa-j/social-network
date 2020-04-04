@@ -42,29 +42,29 @@ const storage = multer.diskStorage({
     const ext = file.mimetype.split("/")[1];
 
     cb(null, uuidv4() + "." + ext);
-  }
+  },
 });
 
 const upload = multer({
   //multer settings
   storage: storage,
-  fileFilter: function(req, file, cb) {
+  fileFilter: function (req, file, cb) {
     checkFileType(file, cb);
   },
   limits: {
-    fileSize: 1024 * 1024
-  }
+    fileSize: 1024 * 1024,
+  },
 }).single("photo");
 
 exports.upload = (req, res, next) => {
-  upload(req, res, err => {
+  upload(req, res, (err) => {
     if (err) return res.json({ message: err.message });
 
     if (!req.file) return res.json({ message: "Please upload a file" });
 
     req.body.photo = req.file.filename;
 
-    Jimp.read(req.file.path, function(err, test) {
+    Jimp.read(req.file.path, function (err, test) {
       if (err) throw err;
       test
         .resize(100, 100)
@@ -76,7 +76,7 @@ exports.upload = (req, res, next) => {
 };
 
 function deleteProfilePicture({ photo }) {
-  fs.unlink("./public/images/profile-picture/" + photo, err => {
+  fs.unlink("./public/images/profile-picture/" + photo, (err) => {
     if (err) {
       console.error(err);
       return;
@@ -84,7 +84,7 @@ function deleteProfilePicture({ photo }) {
     console.log("removed");
   });
 
-  fs.unlink("./public/images/profile-picture/100x100/" + photo, err => {
+  fs.unlink("./public/images/profile-picture/100x100/" + photo, (err) => {
     if (err) {
       console.error(err);
       return;
@@ -96,7 +96,7 @@ function deleteProfilePicture({ photo }) {
 exports.changeProfilePicture = (req, res) => {
   User.findById(req.userData.userId)
     .select("profilePicture")
-    .then(data => {
+    .then((data) => {
       if (data.profilePicture !== "person.png") {
         deleteProfilePicture({ photo: data.profilePicture });
       }
@@ -107,26 +107,56 @@ exports.changeProfilePicture = (req, res) => {
         { new: true }
       )
         .select("profilePicture")
-        .then(user => {
+        .then((user) => {
           return res.status(200).json({ user });
         })
-        .catch(err => {
+        .catch((err) => {
           console.log(err);
           return res.status(500).json({ message: err.message });
         });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
       return res.status(500).json({ message: err.message });
     });
 };
 
 exports.activate = (req, res) => {
+  if (process.env.ENABLE_SEND_EMAIL === "false") {
+    return res.status(200).header("Content-Type", "text/html")
+      .send(`<!DOCTYPE html>
+    <html lang="en">
+    
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="theme-color" content="#000000">
+        <style>
+            .alert {
+                padding: 20px;
+                background-color: #f44336;
+                color: white;
+            }
+        </style>
+        <title>social-network</title>
+    </head>
+    
+    <body>
+        <div class="alert">
+            <strong>Error!</strong> Disabled.
+        </div>
+    
+    </body>
+    
+    </html>
+  `);
+  }
+
   try {
     const decoded = jwt.verify(req.params.token, process.env.JWT_KEY);
 
     User.findByIdAndUpdate(decoded._id, {
-      activated: true
+      activated: true,
     })
       .then(() => {
         return res.status(200).header("Content-Type", "text/html")
@@ -157,7 +187,7 @@ exports.activate = (req, res) => {
           </html>
           `);
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
         return res.status(401).header("Content-Type", "text/html")
           .send(`<!DOCTYPE html>
@@ -220,8 +250,8 @@ exports.activate = (req, res) => {
 
 exports.addUser = (req, res) => {
   User.findOne({
-    $or: [{ email: req.body.email }, { username: req.body.username }]
-  }).then(user => {
+    $or: [{ email: req.body.email }, { username: req.body.username }],
+  }).then((user) => {
     if (!user) {
       bcrypt.hash(req.body.password, 10, (err, hash) => {
         if (err) {
@@ -232,27 +262,33 @@ exports.addUser = (req, res) => {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
             username: req.body.username,
-            password: hash
+            password: hash,
           });
 
           user
             .save()
-            .then(user => {
+            .then((user) => {
               notificationHandler.sendNewUser({ req, user });
               const following = new Following({ user: user._id }).save();
               const followers = new Followers({ user: user._id }).save();
               Promise.all([following, followers]).then(() => {
-                sendVerificationEmail.sendEmail({
-                  email: user.email,
-                  _id: user._id,
-                  username: user.username
-                });
-                return res.status(201).json({
-                  message: "Verify your email address"
-                });
+                if (process.env.ENABLE_SEND_EMAIL === "true") {
+                  sendVerificationEmail.sendEmail({
+                    email: user.email,
+                    _id: user._id,
+                    username: user.username,
+                  });
+                  return res.status(201).json({
+                    message: "Verify your email address",
+                  });
+                } else {
+                  return res.status(201).json({
+                    message: "Account created",
+                  });
+                }
               });
             })
-            .catch(err => {
+            .catch((err) => {
               return res.status(500).json({ message: err.message });
             });
         }
@@ -260,11 +296,11 @@ exports.addUser = (req, res) => {
     } else {
       if (user.username === req.body.username) {
         return res.status(409).json({
-          message: "Username exists"
+          message: "Username exists",
         });
       } else if (user.email === req.body.email) {
         return res.status(409).json({
-          message: "Email exists"
+          message: "Email exists",
         });
       }
     }
@@ -274,7 +310,7 @@ exports.addUser = (req, res) => {
 exports.sendVerificationEmail = (req, res) => {
   User.findOne({ email: req.body.email, activated: false })
     .select("email username")
-    .then(user => {
+    .then((user) => {
       if (user) {
         sendVerificationEmail.sendEmail(user);
         return res.status(200).json({ message: "Email sent." });
@@ -286,27 +322,29 @@ exports.sendVerificationEmail = (req, res) => {
 exports.loginUser = (req, res, next) => {
   User.aggregate([
     {
-      $match: { $or: [{ email: req.body.email }, { username: req.body.email }] }
+      $match: {
+        $or: [{ email: req.body.email }, { username: req.body.email }],
+      },
     },
     {
       $project: {
         _id: 1,
         username: 1,
         email: 1,
-        password: 1
-      }
-    }
+        password: 1,
+      },
+    },
   ])
-    .then(users => {
+    .then((users) => {
       if (users.length < 1) {
         return res.status(400).json({
-          message: "Incorrect credentials."
+          message: "Incorrect credentials.",
         });
       } else {
         bcrypt.compare(req.body.password, users[0].password, (err, result) => {
           if (err) {
             return res.status(400).json({
-              message: "Incorrect credentials."
+              message: "Incorrect credentials.",
             });
           }
           if (result) {
@@ -314,17 +352,17 @@ exports.loginUser = (req, res, next) => {
               {
                 email: users[0].email,
                 userId: users[0]._id,
-                username: users[0].username
+                username: users[0].username,
               },
               process.env.JWT_KEY,
               {
-                expiresIn: "30m"
+                expiresIn: "30m",
               }
             );
 
             const user = {
               _id: users[0]._id,
-              token: "Bearer " + token
+              token: "Bearer " + token,
             };
             req.body.user = user;
             next();
@@ -334,22 +372,22 @@ exports.loginUser = (req, res, next) => {
         });
       }
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
       res.status(500).json({ message: err });
     });
 };
 
 exports.deleteUser = (req, res) => {
-  User.remove({ _id: req.userData.userId }).then(result => {
+  User.remove({ _id: req.userData.userId }).then((result) => {
     res
       .status(200)
       .json({
-        message: "User deleted"
+        message: "User deleted",
       })
-      .catch(err => {
+      .catch((err) => {
         res.status(500).json({
-          error: err
+          error: err,
         });
       });
   });
@@ -359,50 +397,50 @@ exports.updateUser = (req, res) => {
   User.find({
     $and: [
       { $or: [{ email: req.body.email }, { username: req.body.username }] },
-      { _id: { $ne: req.userData.userId } }
-    ]
+      { _id: { $ne: req.userData.userId } },
+    ],
   })
     .select("username email")
-    .then(user => {
+    .then((user) => {
       if (user.length) {
         const { username, email } = user[0];
 
         if (username === req.body.username) {
           return res.status(409).json({
-            message: "Username exists"
+            message: "Username exists",
           });
         }
 
         if (email === req.body.email) {
           return res.status(409).json({
-            message: "Email exists"
+            message: "Email exists",
           });
         }
       } else {
         User.findByIdAndUpdate(
           req.userData.userId,
           {
-            ...req.body
+            ...req.body,
           },
           { new: true }
         )
           .select("firstName lastName username email bio")
-          .then(user => {
+          .then((user) => {
             const token = jwt.sign(
               {
                 email: user.email,
                 userId: user._id,
-                username: user.username
+                username: user.username,
               },
               process.env.JWT_KEY,
               {
-                expiresIn: "30m"
+                expiresIn: "30m",
               }
             );
 
             res.status(200).json({ user, token: "Bearer " + token });
           })
-          .catch(err => {
+          .catch((err) => {
             console.log(err);
             res.status(500).json({ message: err });
           });
@@ -413,20 +451,20 @@ exports.updateUser = (req, res) => {
 exports.getUserData = (req, res, next) => {
   const notification = Notification.find({
     receiver: mongoose.Types.ObjectId(req.userData.userId),
-    read: false
+    read: false,
   }).countDocuments();
 
   const allNotification = Notification.find({
-    receiver: mongoose.Types.ObjectId(req.userData.userId)
+    receiver: mongoose.Types.ObjectId(req.userData.userId),
   }).countDocuments();
 
   const posts = Post.find({
-    author: mongoose.Types.ObjectId(req.userData.userId)
+    author: mongoose.Types.ObjectId(req.userData.userId),
   }).countDocuments();
 
   const messages = Message.find({
     receiver: mongoose.Types.ObjectId(req.userData.userId),
-    read: false
+    read: false,
   }).countDocuments();
 
   const user = User.aggregate([
@@ -436,16 +474,16 @@ exports.getUserData = (req, res, next) => {
         from: "followings",
         localField: "_id",
         foreignField: "user",
-        as: "followings"
-      }
+        as: "followings",
+      },
     },
     {
       $lookup: {
         from: "followers",
         localField: "_id",
         foreignField: "user",
-        as: "followers"
-      }
+        as: "followers",
+      },
     },
     {
       $project: {
@@ -457,25 +495,25 @@ exports.getUserData = (req, res, next) => {
         notifications: 1,
         profilePicture: 1,
         followings: {
-          $size: { $arrayElemAt: ["$followings.following", 0] }
+          $size: { $arrayElemAt: ["$followings.following", 0] },
         },
         followers: {
-          $size: { $arrayElemAt: ["$followers.followers", 0] }
+          $size: { $arrayElemAt: ["$followers.followers", 0] },
         },
         followingIds: { $arrayElemAt: ["$followings.following.user", 0] },
         postLikes: "$postLikes.post",
         commentLikes: "$commentLikes.comment",
-        commentReplyLikes: "$commentReplyLikes.comment"
-      }
-    }
+        commentReplyLikes: "$commentReplyLikes.comment",
+      },
+    },
   ]);
 
   Promise.all([user, notification, posts, messages, allNotification])
-    .then(values => {
+    .then((values) => {
       const user = values[0];
       if (user.length < 1) {
         return res.status(404).json({
-          message: "User not found"
+          message: "User not found",
         });
       }
 
@@ -498,15 +536,15 @@ exports.getUserData = (req, res, next) => {
         notificationsCount: values[1],
         postsCount: values[2],
         messagesCount: values[3],
-        allNotifications: values[4]
+        allNotifications: values[4],
       };
       req.body.user = data;
 
       next();
     })
-    .catch(err => {
+    .catch((err) => {
       res.status(500).json({
-        message: err.message
+        message: err.message,
       });
     });
 };
@@ -517,55 +555,55 @@ exports.sendUserData = (req, res) => {
 
 exports.followUser = (req, res) => {
   ChatRoom.find({ members: { $all: [req.userData.userId, req.body.userId] } })
-    .then(room => {
+    .then((room) => {
       if (!room.length) {
         new ChatRoom({
-          members: [req.body.userId, req.userData.userId]
+          members: [req.body.userId, req.userData.userId],
         })
           .save()
-          .then(room => {
+          .then((room) => {
             room
               .populate(
                 "members",
                 "username firstName lastName profilePicture activityStatus"
               )
               .execPopulate()
-              .then(room => {
+              .then((room) => {
                 messageHandler.sendRoom(req, {
                   userId: req.body.userId,
-                  room: room.toObject()
+                  room: room.toObject(),
                 });
               });
           });
       }
     })
-    .catch(err => console.log(err.message));
+    .catch((err) => console.log(err.message));
 
   // if user follows itself
   if (req.userData.userId !== req.body.userId) {
     Following.updateOne(
       {
         user: req.userData.userId,
-        "following.user": { $ne: req.body.userId }
+        "following.user": { $ne: req.body.userId },
       },
       {
-        $addToSet: { following: { user: req.body.userId } }
+        $addToSet: { following: { user: req.body.userId } },
       }
-    ).then(document => {
+    ).then((document) => {
       if (document.nModified === 1) {
         const notification = new Notification({
           sender: req.userData.userId,
           message: "followed you",
           receiver: req.body.userId,
-          type: "follow"
+          type: "follow",
         }).save();
 
         const followers = Followers.updateOne(
           {
-            user: req.body.userId
+            user: req.body.userId,
           },
           {
-            $push: { followers: { user: req.userData.userId } }
+            $push: { followers: { user: req.userData.userId } },
           }
         );
 
@@ -574,28 +612,28 @@ exports.followUser = (req, res) => {
         );
 
         Promise.all([user, notification, followers])
-          .then(values => {
+          .then((values) => {
             notificationHandler.sendFollowNotification(req, values);
             return res.status(200).json({
               userId: req.body.userId,
-              action: "followed"
+              action: "followed",
             });
           })
-          .catch(err => console.log(err));
+          .catch((err) => console.log(err));
       } else {
         const following = Following.updateOne(
           { user: req.userData.userId },
           {
-            $pull: { following: { user: req.body.userId } }
+            $pull: { following: { user: req.body.userId } },
           }
         );
 
         const followers = Followers.updateOne(
           {
-            user: req.body.userId
+            user: req.body.userId,
           },
           {
-            $pull: { followers: { user: req.userData.userId } }
+            $pull: { followers: { user: req.userData.userId } },
           }
         );
 
@@ -603,10 +641,10 @@ exports.followUser = (req, res) => {
           .then(() => {
             return res.status(200).json({
               userId: req.body.userId,
-              action: "unfollowed"
+              action: "unfollowed",
             });
           })
-          .catch(err => console.log(err));
+          .catch((err) => console.log(err));
       }
     });
   } else {
@@ -623,13 +661,13 @@ exports.getNewUsers = (req, res) => {
       .limit(30);
 
     Promise.all([usersCount, users])
-      .then(response => {
+      .then((response) => {
         const [usersCount, users] = response;
         res.status(200).json({ usersCount, users });
       })
-      .catch(err => {
+      .catch((err) => {
         return res.status(500).json({
-          message: err.message
+          message: err.message,
         });
       });
   } else {
@@ -637,10 +675,10 @@ exports.getNewUsers = (req, res) => {
       .select("username date profilePicture")
       .sort({ date: -1 })
       .limit(30)
-      .then(users => {
+      .then((users) => {
         return res.status(200).json({ users });
       })
-      .catch(err => res.status(500).json({ message: err.message }));
+      .catch((err) => res.status(500).json({ message: err.message }));
   }
 };
 
@@ -656,16 +694,16 @@ exports.getUserProfileData = (req, res, next) => {
         from: "followings",
         localField: "_id",
         foreignField: "user",
-        as: "followings"
-      }
+        as: "followings",
+      },
     },
     {
       $lookup: {
         from: "followers",
         localField: "_id",
         foreignField: "user",
-        as: "followers"
-      }
+        as: "followers",
+      },
     },
     {
       $project: {
@@ -676,26 +714,26 @@ exports.getUserProfileData = (req, res, next) => {
         bio: 1,
         profilePicture: 1,
         followings: {
-          $size: { $arrayElemAt: ["$followings.following", 0] }
+          $size: { $arrayElemAt: ["$followings.following", 0] },
         },
         followers: {
-          $size: { $arrayElemAt: ["$followers.followers", 0] }
-        }
-      }
-    }
+          $size: { $arrayElemAt: ["$followers.followers", 0] },
+        },
+      },
+    },
   ])
-    .then(user => {
+    .then((user) => {
       if (user.length < 1) {
         return res.status(404).json({
-          message: "User not found"
+          message: "User not found",
         });
       }
 
       Post.find({
-        author: mongoose.Types.ObjectId(user[0]._id)
+        author: mongoose.Types.ObjectId(user[0]._id),
       })
         .countDocuments()
-        .then(postsCount => {
+        .then((postsCount) => {
           let data = {
             _id: user[0]._id,
             firstName: user[0].firstName,
@@ -708,20 +746,20 @@ exports.getUserProfileData = (req, res, next) => {
             followers: user[0].followers,
             follwingUsers: [],
             followerUsers: [],
-            postsCount
+            postsCount,
           };
           req.body.user = data;
           next();
         })
-        .catch(err => {
+        .catch((err) => {
           res.status(500).json({
-            message: err.message
+            message: err.message,
           });
         });
     })
-    .catch(err => {
+    .catch((err) => {
       res.status(500).json({
-        message: err.message
+        message: err.message,
       });
     });
 };
@@ -733,12 +771,12 @@ exports.getPosts = (req, res) => {
         $and: [
           {
             _id: {
-              $lt: mongoose.Types.ObjectId(req.body.lastId)
+              $lt: mongoose.Types.ObjectId(req.body.lastId),
             },
-            author: mongoose.Types.ObjectId(req.body.userId)
-          }
-        ]
-      }
+            author: mongoose.Types.ObjectId(req.body.userId),
+          },
+        ],
+      },
     },
     { $sort: { createdAt: -1 } },
     { $limit: 10 },
@@ -747,24 +785,24 @@ exports.getPosts = (req, res) => {
         from: "users",
         localField: "author",
         foreignField: "_id",
-        as: "author"
-      }
+        as: "author",
+      },
     },
     {
       $lookup: {
         from: "postlikes",
         localField: "_id",
         foreignField: "post",
-        as: "likes"
-      }
+        as: "likes",
+      },
     },
     {
       $lookup: {
         from: "comments",
         localField: "_id",
         foreignField: "post",
-        as: "comments"
-      }
+        as: "comments",
+      },
     },
 
     {
@@ -776,28 +814,28 @@ exports.getPosts = (req, res) => {
         hashtags: 1,
         location: 1,
         likes: {
-          $size: { $arrayElemAt: ["$likes.users_likes", 0] }
+          $size: { $arrayElemAt: ["$likes.users_likes", 0] },
         },
         comments: {
-          $size: "$comments"
+          $size: "$comments",
         },
         description: 1,
         "author._id": 1,
         "author.username": 1,
-        "author.profilePicture": 1
-      }
-    }
+        "author.profilePicture": 1,
+      },
+    },
   ])
-    .then(posts => {
+    .then((posts) => {
       return res.status(200).json({ posts });
     })
-    .catch(err => res.status(500).json({ message: err.message }));
+    .catch((err) => res.status(500).json({ message: err.message }));
 };
 
 exports.getUserPosts = (req, res, next) => {
   Post.aggregate([
     {
-      $match: { author: mongoose.Types.ObjectId(req.body.user._id) }
+      $match: { author: mongoose.Types.ObjectId(req.body.user._id) },
     },
     { $sort: { createdAt: -1 } },
     { $limit: 10 },
@@ -806,24 +844,24 @@ exports.getUserPosts = (req, res, next) => {
         from: "users",
         localField: "author",
         foreignField: "_id",
-        as: "author"
-      }
+        as: "author",
+      },
     },
     {
       $lookup: {
         from: "postlikes",
         localField: "_id",
         foreignField: "post",
-        as: "likes"
-      }
+        as: "likes",
+      },
     },
     {
       $lookup: {
         from: "comments",
         localField: "_id",
         foreignField: "post",
-        as: "comments"
-      }
+        as: "comments",
+      },
     },
     {
       $project: {
@@ -832,22 +870,22 @@ exports.getUserPosts = (req, res, next) => {
         tags: 1,
         location: 1,
         likes: {
-          $size: { $arrayElemAt: ["$likes.users_likes", 0] }
+          $size: { $arrayElemAt: ["$likes.users_likes", 0] },
         },
         comments: {
-          $size: { $ifNull: ["$comments", []] }
+          $size: { $ifNull: ["$comments", []] },
         },
         description: 1,
         "author._id": 1,
-        "author.username": 1
-      }
-    }
+        "author.username": 1,
+      },
+    },
   ])
-    .then(posts => {
+    .then((posts) => {
       req.body.user.posts = posts;
       next();
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
       res.status(500).json({ message: err.message });
     });
@@ -859,15 +897,15 @@ exports.searchUsersByUsername = (req, res) => {
       $or: [
         { firstName: new RegExp("^" + req.body.q, "i") },
         { lastName: new RegExp("^" + req.body.q, "i") },
-        { username: new RegExp("^" + req.body.q, "i") }
-      ]
+        { username: new RegExp("^" + req.body.q, "i") },
+      ],
     })
       .limit(10)
       .select("username profilePicture firstName lastName ")
-      .then(users => {
+      .then((users) => {
         return res.status(200).json({ users });
       })
-      .catch(err => res.status(500).json({ message: err.message }));
+      .catch((err) => res.status(500).json({ message: err.message }));
   }
 };
 
@@ -880,31 +918,31 @@ exports.getFollowings = (req, res, next) => {
         from: "followings",
         localField: "_id",
         foreignField: "user",
-        as: "followings"
-      }
+        as: "followings",
+      },
     },
 
     {
       $project: {
-        followings: { $arrayElemAt: ["$followings.following.user", 0] }
-      }
-    }
+        followings: { $arrayElemAt: ["$followings.following.user", 0] },
+      },
+    },
   ])
-    .then(user => {
+    .then((user) => {
       req.body.followings = user[0].followings;
       next();
     })
-    .catch(err => res.status(500).json({ message: err.message }));
+    .catch((err) => res.status(500).json({ message: err.message }));
 };
 
 exports.getUserProfileFollowers = (req, res) => {
   Followers.find({ user: mongoose.Types.ObjectId(req.body.userId) })
     .populate("followers.user", "username profilePicture ")
     .select("followers.user")
-    .then(users => {
+    .then((users) => {
       return res.status(200).json({ users });
     })
-    .catch(err => res.status(500).json({ message: err.message }));
+    .catch((err) => res.status(500).json({ message: err.message }));
 };
 
 exports.getUserProfileFollowings = (req, res) => {
@@ -912,39 +950,39 @@ exports.getUserProfileFollowings = (req, res) => {
 
     .populate("following.user", "username profilePicture ")
     .select("following.user.email")
-    .then(users => {
+    .then((users) => {
       return res.status(200).json({ users });
     })
-    .catch(err => res.status(500).json({ message: err.message }));
+    .catch((err) => res.status(500).json({ message: err.message }));
 };
 
 exports.changeStatus = (userId, clients, io) => {
   if (!clients.length) {
     Followers.find({ user: mongoose.Types.ObjectId(userId) })
       .select("followers.user")
-      .then(user => {
-        user[0].followers.forEach(user => {
+      .then((user) => {
+        user[0].followers.forEach((user) => {
           const toUserId = user.user;
           io.sockets.in(toUserId).emit("activityStatusUpdate", {
             activityStatus: "offline",
-            user: userId
+            user: userId,
           });
         });
       })
-      .catch(err => console.log(err.message));
+      .catch((err) => console.log(err.message));
 
     Following.find({ user: mongoose.Types.ObjectId(userId) })
       .select("following.user")
-      .then(user => {
-        user[0].following.forEach(user => {
+      .then((user) => {
+        user[0].following.forEach((user) => {
           const toUserId = user.user;
           io.sockets.in(toUserId).emit("activityStatusUpdate", {
             activityStatus: "offline",
-            user: userId
+            user: userId,
           });
         });
       })
-      .catch(err => console.log(err.message));
+      .catch((err) => console.log(err.message));
 
     User.findByIdAndUpdate(
       { _id: userId },
@@ -952,33 +990,33 @@ exports.changeStatus = (userId, clients, io) => {
       { new: true }
     )
       .then(() => {})
-      .catch(err => console.log(err.message));
+      .catch((err) => console.log(err.message));
   } else {
     Followers.find({ user: mongoose.Types.ObjectId(userId) })
       .select("followers.user")
-      .then(user => {
-        user[0].followers.forEach(user => {
+      .then((user) => {
+        user[0].followers.forEach((user) => {
           const toUserId = user.user;
           io.sockets.in(toUserId).emit("activityStatusUpdate", {
             activityStatus: "online",
-            user: userId
+            user: userId,
           });
         });
       })
-      .catch(err => console.log(err.message));
+      .catch((err) => console.log(err.message));
 
     Following.find({ user: mongoose.Types.ObjectId(userId) })
       .select("following.user")
-      .then(user => {
-        user[0].following.forEach(user => {
+      .then((user) => {
+        user[0].following.forEach((user) => {
           const toUserId = user.user;
           io.sockets.in(toUserId).emit("activityStatusUpdate", {
             activityStatus: "online",
-            user: userId
+            user: userId,
           });
         });
       })
-      .catch(err => console.log(err.message));
+      .catch((err) => console.log(err.message));
 
     User.findByIdAndUpdate(
       { _id: userId },
@@ -986,6 +1024,6 @@ exports.changeStatus = (userId, clients, io) => {
       { new: true }
     )
       .then(() => {})
-      .catch(err => console.log(err.message));
+      .catch((err) => console.log(err.message));
   }
 };

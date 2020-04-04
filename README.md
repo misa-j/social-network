@@ -25,20 +25,20 @@ Mini social network that I made as my first MERN stack project.
 
 ## Gif
 
-![](screenshots/ezgif.com-video-to-gif%20(1).gif)
+![](<screenshots/ezgif.com-video-to-gif%20(1).gif>)
 
 ## Link to a full video
+
 [Video](https://streamable.com/5srsv)
 
 ## Built With
 
-* [React](https://reactjs.org/) - A JavaScript library for building user interfaces
-* [Redux](https://redux.js.org/) - State managment
-* [Semantic UI React](https://react.semantic-ui.com/) - UI
-* [Socket.io](https://socket.io/) - Used for realtime features
-* [Node](https://nodejs.org/en/) - Used for backend
-* [Mongodb](https://www.mongodb.com/) - Database
-
+- [React](https://reactjs.org/) - A JavaScript library for building user interfaces
+- [Redux](https://redux.js.org/) - State managment
+- [Semantic UI React](https://react.semantic-ui.com/) - UI
+- [Socket.io](https://socket.io/) - Used for realtime features
+- [Node](https://nodejs.org/en/) - Used for backend
+- [Mongodb](https://www.mongodb.com/) - Database
 
 ## Features
 
@@ -53,7 +53,7 @@ Mini social network that I made as my first MERN stack project.
 
 ### Realtime
 
-- Get notification when someone likes your post, comment, reply, tag you on post or reply on comment 
+- Get notification when someone likes your post, comment, reply, tag you on post or reply on comment
 - Chat send text message, image
 - Seen feature and activity status of user
 
@@ -74,13 +74,16 @@ JWT_KEY="secretkey"
 EMAILUSER="example@gmail.com"
 EMAILPASS="example"
 HOST="your ip eg. http://192.168.0.14:5000"
+ENABLE_SEND_EMAIL="true or false"
 ```
 
-3. Go into ```client/src/_services/socketService.js``` and replace   
+3. Go into `client/src/_services/socketService.js` and replace
+
 ```
 window.location.hostname
 ```
-with your local IP address on port 5000 eg. 
+
+with your local IP address on port 5000 eg.
 
 ```
 192.168.0.14:5000
@@ -94,11 +97,9 @@ npm run dev
 
 ## Acknowledgments
 
-* [Layout for proflie page](https://codepen.io/GeorgePark/pen/VXrwOP)
-* [Layout for messenger](https://codepen.io/merong/pen/JjoKKZg)
-
+- [Layout for proflie page](https://codepen.io/GeorgePark/pen/VXrwOP)
+- [Layout for messenger](https://codepen.io/merong/pen/JjoKKZg)
 
 ## Contribute
 
 Show your support by 🌟 the project.
-

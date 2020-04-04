@@ -5,24 +5,24 @@ const postLikeSchema = new mongoose.Schema({
   post: {
     type: mongoose.Schema.ObjectId,
     required: true,
-    ref: "Post"
-  }
+    ref: "Post",
+  },
 });
 
 const commentLikeSchema = new mongoose.Schema({
   comment: {
     type: mongoose.Schema.ObjectId,
     required: true,
-    ref: "Comment"
-  }
+    ref: "Comment",
+  },
 });
 
 const commentReplyLikeSchema = new mongoose.Schema({
   comment: {
     type: mongoose.Schema.ObjectId,
     required: true,
-    ref: "Reply"
-  }
+    ref: "Reply",
+  },
 });
 
 const UserSchema = new mongoose.Schema({
@@ -32,7 +32,7 @@ const UserSchema = new mongoose.Schema({
     minlength: 3,
     maxlength: 30,
     trim: true,
-    match: /^([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)$/
+    match: /^([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)$/,
   },
   lastName: {
     type: String,
@@ -40,7 +40,7 @@ const UserSchema = new mongoose.Schema({
     minlength: 3,
     maxlength: 30,
     trim: true,
-    match: /^([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)$/
+    match: /^([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)$/,
   },
   username: {
     type: String,
@@ -49,13 +49,13 @@ const UserSchema = new mongoose.Schema({
     trim: true,
     match: /^([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)$/,
     required: true,
-    unique: true
+    unique: true,
   },
   bio: {
     type: String,
     default: "",
     trim: true,
-    maxlength: 250
+    maxlength: 250,
   },
   email: {
     type: String,
@@ -63,32 +63,32 @@ const UserSchema = new mongoose.Schema({
     required: true,
     maxlength: 40,
     unique: true,
-    match: /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
+    match: /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/,
   },
   password: {
     trim: true,
     type: String,
-    required: true
+    required: true,
   },
   date: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   profilePicture: {
     type: String,
-    default: "person.png"
+    default: "person.png",
   },
   activityStatus: {
     type: String,
-    default: "offline"
+    default: "offline",
   },
   activated: {
     type: Boolean,
-    default: false
+    default: process.env.ENABLE_SEND_EMAIL === "true" ? false : true,
   },
   postLikes: [postLikeSchema],
   commentLikes: [commentLikeSchema],
-  commentReplyLikes: [commentReplyLikeSchema]
+  commentReplyLikes: [commentReplyLikeSchema],
 });
 
 UserSchema.index({ username: "text", firstName: "text", lastName: "text" });

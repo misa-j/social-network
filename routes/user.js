@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
 const checkAuth = require("../middleware/checkAuth");
+const checkEmailEnv = require("../middleware/checkEmailEnv");
 const userValidator = require("../middleware/schemaValidators/userValidator");
 const verificationCheck = require("../middleware/verificationCheck");
 
@@ -25,7 +26,7 @@ router.get("/email/activate/:token", userController.activate);
 
 router.post(
   "/sendVerificationEmail",
-
+  checkEmailEnv,
   userValidator.sendVerificationEmail,
   userController.sendVerificationEmail
 );
