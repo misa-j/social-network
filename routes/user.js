@@ -22,6 +22,13 @@ router.post(
   userController.getNewUsers
 );
 
+router.post(
+  "/passwordreset",
+  checkAuth,
+  userValidator.resetPassword,
+  userController.resetPassword
+);
+
 router.get("/email/activate/:token", userController.activate);
 
 router.post(
@@ -29,6 +36,13 @@ router.post(
   checkEmailEnv,
   userValidator.sendVerificationEmail,
   userController.sendVerificationEmail
+);
+
+router.post(
+  "/sendforgotPasswordEmail",
+  checkEmailEnv,
+  userValidator.sendVerificationEmail,
+  userController.sendforgotPasswordEmail
 );
 
 router.post(

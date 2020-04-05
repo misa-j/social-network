@@ -13,11 +13,11 @@ require("dotenv").config({ path: "variables.env" });
 // connect to DB
 mongoose.connect(process.env.DATABASE, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
 });
 
 mongoose.Promise = global.Promise; // Tell Mongoose to use ES6 promises
-mongoose.connection.on("error", err => {
+mongoose.connection.on("error", (err) => {
   console.error(err.message);
 });
 
@@ -58,17 +58,17 @@ io.use((socket, next) => {
   } else {
     next(new Error("Authentication error"));
   }
-}).on("connection", socket => {
+}).on("connection", (socket) => {
   // Connection now authenticated to receive further events
   socket.join(socket.userData.userId);
   io.in(socket.userData.userId).clients((err, clients) => {
     userController.changeStatus(socket.userData.userId, clients, io);
     //console.log(clients);
   });
-  socket.on("typing", data => {
+  socket.on("typing", (data) => {
     socket.to(data.userId).emit("typing", { roomId: data.roomId });
   });
-  socket.on("stoppedTyping", data => {
+  socket.on("stoppedTyping", (data) => {
     socket.to(data.userId).emit("stoppedTyping", { roomId: data.roomId });
   });
   socket.on("disconnect", () => {
@@ -82,7 +82,7 @@ io.use((socket, next) => {
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200 // limit each IP to 200 requests per windowMs
+  max: 200, // limit each IP to 200 requests per windowMs
 });
 
 const postsRouter = require("./routes/post");
@@ -96,7 +96,7 @@ if (process.env.NODE_ENV === "production") {
   app.use(limiter);
   app.use(
     logger("common", {
-      stream: fs.createWriteStream("./access.log", { flags: "a" })
+      stream: fs.createWriteStream("./access.log", { flags: "a" }),
     })
   );
 } else {
@@ -112,6 +112,10 @@ app.use("/api/user/", usersRouter);
 app.use("/api/comment/", commentsRouter);
 app.use("/api/notification/", notificationRouter);
 app.use("/api/chat/", chatRouter);
+
+app.get("/auth/reset/password/:jwt", function (req, res) {
+  return res.status(404).json({ message: "go to port 3000" });
+});
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
@@ -129,8 +133,8 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500);
   res.json({
     error: {
-      message: err.message
-    }
+      message: err.message,
+    },
   });
 });
 

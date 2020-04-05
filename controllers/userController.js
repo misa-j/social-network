@@ -14,7 +14,7 @@ const Notification = mongoose.model("Notification");
 const ChatRoom = mongoose.model("ChatRoom");
 const Message = mongoose.model("Message");
 const notificationHandler = require("../handlers/notificationHandler");
-const sendVerificationEmail = require("../handlers/sendVerificationEmail");
+const emailHandler = require("../handlers/emailHandler");
 const messageHandler = require("../handlers/messageHandler");
 
 // Check File Type
@@ -273,7 +273,7 @@ exports.addUser = (req, res) => {
               const followers = new Followers({ user: user._id }).save();
               Promise.all([following, followers]).then(() => {
                 if (process.env.ENABLE_SEND_EMAIL === "true") {
-                  sendVerificationEmail.sendEmail({
+                  emailHandler.sendVerificationEmail({
                     email: user.email,
                     _id: user._id,
                     username: user.username,
@@ -307,12 +307,42 @@ exports.addUser = (req, res) => {
   });
 };
 
+exports.resetPassword = (req, res) => {
+  bcrypt.hash(req.body.password, 10, (err, hash) => {
+    if (err) {
+      return res.status(500).json({ message: err });
+    } else {
+      User.findOneAndUpdate({ email: req.userData.email }, { password: hash })
+        .then(() => {
+          return res.status(200).json({ message: "password reseted" });
+        })
+        .catch((err) => {
+          console.log(err.message);
+          return res.status(500).json({ message: err.message });
+        });
+    }
+  });
+};
+
 exports.sendVerificationEmail = (req, res) => {
   User.findOne({ email: req.body.email, activated: false })
     .select("email username")
     .then((user) => {
       if (user) {
-        sendVerificationEmail.sendEmail(user);
+        emailHandler.sendVerificationEmail(user);
+        return res.status(200).json({ message: "Email sent." });
+      }
+      return res.status(400).json({ message: "Something went wrong." });
+    });
+};
+
+exports.sendforgotPasswordEmail = (req, res) => {
+  console.log(req.body);
+  User.findOne({ email: req.body.email })
+    .select("email username")
+    .then((user) => {
+      if (user) {
+        emailHandler.sendPasswordResetEmail(user);
         return res.status(200).json({ message: "Email sent." });
       }
       return res.status(400).json({ message: "Something went wrong." });

@@ -13,6 +13,7 @@ import { socket } from "./socketReducer";
 import { postUpload } from "./postUploadPageReducer";
 import { chat } from "./chatReducer";
 import { newUsers } from "./newUsersReducer";
+import { passwordReset } from "./passwordResetReducer";
 import { userConstants } from "../_constants/userConstants";
 
 const appReducer = combineReducers({
@@ -21,6 +22,7 @@ const appReducer = combineReducers({
   registration,
   user,
   newUsers,
+  passwordReset,
   alert,
   comments,
   replies,
@@ -28,7 +30,7 @@ const appReducer = combineReducers({
   notification,
   socket,
   postUpload,
-  chat
+  chat,
 });
 
 const rootReducer = (state, action) => {

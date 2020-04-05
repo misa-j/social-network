@@ -18,27 +18,52 @@ export const userActions = {
   getFollowings,
   updateUserData,
   followUser,
+  sendforgotPasswordEmail,
   getUserProfileData,
-  getNewUsers
+  getNewUsers,
+  resetPassword,
 };
 
 function logout() {
   userService.logout();
-  return dispatch => {
+  return (dispatch) => {
     dispatch({ type: userConstants.LOGOUT });
   };
 }
 
+function resetPassword(data) {
+  return (dispatch) => {
+    dispatch(request());
+    userService.resetPassword(data).then(
+      (res) => {
+        dispatch(alertActions.success(res.message));
+        dispatch(response());
+      },
+      (error) => {
+        dispatch(alertActions.error(error));
+        dispatch(response());
+      }
+    );
+  };
+
+  function response() {
+    return { type: userConstants.PASSWORD_RESET_RESPONSE };
+  }
+  function request() {
+    return { type: userConstants.PASSWORD_RESET_REQUEST };
+  }
+}
+
 function getNewUsers(params) {
-  return dispatch => {
+  return (dispatch) => {
     if (!params.initialFetch) {
       dispatch(request());
     }
     userService.getNewUsers(params).then(
-      res => {
+      (res) => {
         dispatch(success({ ...res, ...params }));
       },
-      error => {
+      (error) => {
         console.log(error);
       }
     );
@@ -53,12 +78,25 @@ function getNewUsers(params) {
 }
 
 function sendVerificationEmail(email) {
-  return dispatch => {
+  return (dispatch) => {
     userService.sendVerificationEmail(email).then(
-      res => {
+      (res) => {
         dispatch(alertActions.success(res.message));
       },
-      error => {
+      (error) => {
+        dispatch(alertActions.error(error));
+      }
+    );
+  };
+}
+
+function sendforgotPasswordEmail(email) {
+  return (dispatch) => {
+    userService.sendforgotPasswordEmail(email).then(
+      (res) => {
+        dispatch(alertActions.success(res.message));
+      },
+      (error) => {
         dispatch(alertActions.error(error));
       }
     );
@@ -66,16 +104,16 @@ function sendVerificationEmail(email) {
 }
 
 function login(email, password) {
-  return dispatch => {
+  return (dispatch) => {
     dispatch(request({ email }));
 
     userService.login(email, password).then(
-      user => {
+      (user) => {
         dispatch(success(user.token));
         dispatch({ type: userConstants.GETUSER_SUCCESS, user });
         history.push("/");
       },
-      error => {
+      (error) => {
         dispatch(failure(error.toString()));
         dispatch(alertActions.error(error.toString()));
       }
@@ -94,16 +132,16 @@ function login(email, password) {
 }
 
 function register(user) {
-  return dispatch => {
+  return (dispatch) => {
     dispatch(request(user));
 
     userService.register(user).then(
-      data => {
+      (data) => {
         dispatch(success());
         history.push("/login");
         dispatch(alertActions.success(data.message));
       },
-      error => {
+      (error) => {
         dispatch(failure(error.toString()));
         dispatch(alertActions.error(error.toString()));
       }
@@ -122,17 +160,17 @@ function register(user) {
 }
 
 function getUserData(queryParams) {
-  return dispatch => {
+  return (dispatch) => {
     dispatch(request());
 
     userService.getUserData(queryParams).then(
-      res => {
-        res.user.posts.forEach(post =>
+      (res) => {
+        res.user.posts.forEach((post) =>
           dispatch({ type: postConstants.INIT_COMMENT, postId: post._id })
         );
         dispatch(success(res.user));
       },
-      error => {
+      (error) => {
         dispatch(failure(error.toString()));
         dispatch(alertActions.error(error.toString()));
       }
@@ -151,15 +189,15 @@ function getUserData(queryParams) {
 }
 
 function getPosts(queryParams) {
-  return dispatch => {
+  return (dispatch) => {
     userService.getPosts(queryParams).then(
-      res => {
-        res.posts.forEach(post =>
+      (res) => {
+        res.posts.forEach((post) =>
           dispatch({ type: postConstants.INIT_COMMENT, postId: post._id })
         );
         dispatch(success(res.posts));
       },
-      error => {
+      (error) => {
         dispatch(alertActions.error(error));
       }
     );
@@ -171,15 +209,15 @@ function getPosts(queryParams) {
 }
 
 function getUserPosts(queryParams) {
-  return dispatch => {
+  return (dispatch) => {
     userService.getPosts(queryParams).then(
-      res => {
-        res.posts.forEach(post =>
+      (res) => {
+        res.posts.forEach((post) =>
           dispatch({ type: postConstants.INIT_COMMENT, postId: post._id })
         );
         dispatch(success(res.posts));
       },
-      error => {
+      (error) => {
         dispatch(alertActions.error(error));
       }
     );
@@ -191,14 +229,14 @@ function getUserPosts(queryParams) {
 }
 
 function updateUserData(user) {
-  return dispatch => {
+  return (dispatch) => {
     dispatch(request());
 
     userService.updateUser(user).then(
-      data => {
+      (data) => {
         dispatch(success(data.user));
       },
-      error => {
+      (error) => {
         dispatch(failure(error.toString()));
         //dispatch(alertActions.error(error.toString()));
       }
@@ -217,16 +255,16 @@ function updateUserData(user) {
 }
 
 function followUser(user) {
-  return dispatch => {
+  return (dispatch) => {
     userService.followUser(user).then(
-      user => {
+      (user) => {
         if (user.action === "followed") {
           dispatch({ type: userConstants.FOLLOW_USER, user });
         } else {
           dispatch({ type: userConstants.UNFOLLOW_USER, user });
         }
       },
-      error => {
+      (error) => {
         console.log(error);
       }
     );
@@ -234,10 +272,10 @@ function followUser(user) {
 }
 
 function getUserProfileData(username) {
-  return dispatch => {
+  return (dispatch) => {
     dispatch(request());
     userService.getUserProfileData(username).then(
-      response => {
+      (response) => {
         // if logged in user requested its profile
 
         if (response.user.loggedInUser) {
@@ -245,11 +283,11 @@ function getUserProfileData(username) {
         }
         document.title = "@" + response.user.username + " | social-network";
         dispatch(success(response));
-        response.user.posts.forEach(post =>
+        response.user.posts.forEach((post) =>
           dispatch({ type: postConstants.INIT_COMMENT, postId: post._id })
         );
       },
-      error => {
+      (error) => {
         console.log(error);
         dispatch(failure());
         dispatch(alertActions.error(error.toString()));
@@ -268,12 +306,12 @@ function getUserProfileData(username) {
 }
 
 function getUserProfileFollowings(userId) {
-  return dispatch => {
+  return (dispatch) => {
     userService.getUserProfileFollowings(userId).then(
-      response => {
+      (response) => {
         dispatch(success(response.users[0].following));
       },
-      error => {
+      (error) => {
         console.log(error);
       }
     );
@@ -285,12 +323,12 @@ function getUserProfileFollowings(userId) {
 }
 
 function getUserProfileFollowers(userId) {
-  return dispatch => {
+  return (dispatch) => {
     userService.getUserProfileFollowers(userId).then(
-      response => {
+      (response) => {
         dispatch(success(response.users[0].followers));
       },
-      error => {
+      (error) => {
         console.log(error);
       }
     );
@@ -302,12 +340,12 @@ function getUserProfileFollowers(userId) {
 }
 
 function getFollowings(userId) {
-  return dispatch => {
+  return (dispatch) => {
     userService.getUserProfileFollowings(userId).then(
-      response => {
+      (response) => {
         dispatch(success(response.users[0].following));
       },
-      error => {
+      (error) => {
         console.log(error);
       }
     );
@@ -319,12 +357,12 @@ function getFollowings(userId) {
 }
 
 function getFollowers(userId) {
-  return dispatch => {
+  return (dispatch) => {
     userService.getUserProfileFollowers(userId).then(
-      response => {
+      (response) => {
         dispatch(success(response.users[0].followers));
       },
-      error => {
+      (error) => {
         console.log(error);
       }
     );

@@ -16,8 +16,10 @@ class LoginPage extends React.Component {
       email: "",
       password: "",
       emailToVerify: "",
+      forgotPasswordEmail: "",
       submitted: false,
-      showForm: false
+      showForm: false,
+      forgotPasswordForm: false,
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -51,13 +53,31 @@ class LoginPage extends React.Component {
     );
   };
 
+  forgotPasswordEmail = () => {
+    this.props.dispatch(
+      userActions.sendforgotPasswordEmail(this.state.forgotPasswordEmail)
+    );
+  };
+
   toggleEmailVerification = () => {
-    this.setState({ showForm: true });
+    this.setState({ showForm: !this.state.showForm });
+  };
+
+  toggleForgotPasswordForm = () => {
+    this.setState({
+      forgotPasswordForm: !this.state.forgotPasswordForm,
+    });
   };
 
   render() {
     const { loggingIn, alert } = this.props;
-    const { email, password, submitted, showForm } = this.state;
+    const {
+      email,
+      password,
+      submitted,
+      showForm,
+      forgotPasswordForm,
+    } = this.state;
     return (
       <div className="form-centered">
         <Message
@@ -112,6 +132,19 @@ class LoginPage extends React.Component {
           Don't have an account?&nbsp;
           <Link to={"/register"}>Create one now</Link>
           <br></br>
+          <Icon name="help" />
+          Forgot password?&nbsp;
+          <span
+            onClick={this.toggleForgotPasswordForm}
+            style={{
+              textDecoration: "underline",
+              fontWeight: "900",
+              cursor: "pointer",
+            }}
+          >
+            reset password
+          </span>
+          <br></br>
           <Icon name="envelope" />
           Resend verification email.&nbsp;
           <span
@@ -119,7 +152,7 @@ class LoginPage extends React.Component {
             style={{
               textDecoration: "underline",
               fontWeight: "900",
-              cursor: "pointer"
+              cursor: "pointer",
             }}
           >
             resend
@@ -142,6 +175,24 @@ class LoginPage extends React.Component {
             </Button>
           </Form>
         ) : null}
+
+        {forgotPasswordForm ? (
+          <Form className="segment" size="large" name="form">
+            <Form.Field>
+              <label>Email</label>
+              <input
+                name="forgotPasswordEmail"
+                placeholder="Email"
+                type="email"
+                onChange={this.handleChange}
+              />
+            </Form.Field>
+            <Button fluid type="submit" onClick={this.forgotPasswordEmail}>
+              Send
+            </Button>
+          </Form>
+        ) : null}
+
         <Message>
           <Message.Header>
             <a
@@ -158,9 +209,9 @@ class LoginPage extends React.Component {
   }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   loggingIn: state.authentication.loggingIn,
-  alert: state.alert
+  alert: state.alert,
 });
 
 const connectedLoginPage = connect(mapStateToProps)(LoginPage);

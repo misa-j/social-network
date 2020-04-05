@@ -8,6 +8,9 @@ import { PrivateRoute } from "./components/PrivateRoute";
 import "./styles/index.css";
 
 const NotFoundPage = lazy(() => import("./NotFoundPage/NotFoundPage"));
+const PasswordResetPage = lazy(() =>
+  import("./PasswordResetPage/PasswordResetPage")
+);
 const HomePage = lazy(() => import("./HomePage/HomePage"));
 const LoginPage = lazy(() => import("./LoginPage/LoginPage"));
 const RegisterPage = lazy(() => import("./RegisterPage/RegisterPage"));
@@ -63,7 +66,7 @@ class App extends React.Component {
                 />
                 <Route
                   path="/hashtags/:hashtag"
-                  render={props => {
+                  render={(props) => {
                     if (!localStorage.getItem("user")) {
                       history.push("/login");
                       window.location.reload();
@@ -78,7 +81,7 @@ class App extends React.Component {
                 />
                 <Route
                   path="/p/:postId"
-                  render={props => {
+                  render={(props) => {
                     if (!localStorage.getItem("user")) {
                       history.push("/login");
                       window.location.reload();
@@ -90,7 +93,7 @@ class App extends React.Component {
                 />
                 <Route
                   path="/location/:coordinates"
-                  render={props => {
+                  render={(props) => {
                     if (!localStorage.getItem("user")) {
                       history.push("/login");
                       window.location.reload();
@@ -106,7 +109,7 @@ class App extends React.Component {
                 <Route
                   exact
                   path="/:username"
-                  render={props => {
+                  render={(props) => {
                     if (!localStorage.getItem("user")) {
                       history.push("/login");
                       window.location.reload();
@@ -119,6 +122,12 @@ class App extends React.Component {
                     );
                   }}
                 />
+
+                <Route
+                  exact
+                  path="/auth/reset/password/:jwt"
+                  render={(props) => <PasswordResetPage {...props} />}
+                />
                 <Route render={() => <NotFoundPage />} />
               </Switch>
             </Fragment>
@@ -129,9 +138,9 @@ class App extends React.Component {
   }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   authentication: state.authentication,
-  isOpen: state.notification.isOpen
+  isOpen: state.notification.isOpen,
 });
 
 const connectedApp = connect(mapStateToProps)(App);
