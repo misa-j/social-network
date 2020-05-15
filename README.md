@@ -12,7 +12,6 @@ Mini social network that I made as my first MERN stack project.
 ![](screenshots/Screenshot%20from%202020-02-29%2019-02-15.png)
 ![](screenshots/Screenshot%20from%202020-02-29%2019-04-54.png)
 ![](screenshots/Screenshot%20from%202020-02-29%2019-06-32.png)
-![](screenshots/Screenshot%20from%202020-02-29%2019-07-06.png)
 ![](screenshots/Screenshot%20from%202020-02-29%2019-07-23.png)
 ![](screenshots/Screenshot%20from%202020-02-29%2019-07-45.png)
 ![](screenshots/Screenshot%20from%202020-02-29%2019-24-06.png)
@@ -74,7 +73,7 @@ JWT_KEY="secretkey"
 EMAILUSER="example@gmail.com"
 EMAILPASS="example"
 HOST="your ip eg. http://192.168.0.14:5000"
-ENABLE_SEND_EMAIL="true or false"
+ENABLE_SEND_EMAIL="true or false" // false if you don't want to set it up
 ```
 
 3. Go into `client/src/_services/socketService.js` and replace
@@ -102,4 +101,4 @@ npm run dev
 
 ## Contribute
 
-Show your support by 🌟 the project.
+Show your support by ⭐ the project.

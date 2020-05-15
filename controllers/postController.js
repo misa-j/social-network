@@ -20,25 +20,25 @@ const postLookup = [
       from: "users",
       localField: "author",
       foreignField: "_id",
-      as: "author"
-    }
+      as: "author",
+    },
   },
   {
     $lookup: {
       from: "postlikes",
       localField: "_id",
       foreignField: "post",
-      as: "likes"
-    }
+      as: "likes",
+    },
   },
   {
     $lookup: {
       from: "comments",
       localField: "_id",
       foreignField: "post",
-      as: "comments"
-    }
-  }
+      as: "comments",
+    },
+  },
 ];
 
 // Check File Type
@@ -58,7 +58,7 @@ function checkFileType(file, cb) {
 }
 
 function arrayRemove(array, value) {
-  return array.filter(item => {
+  return array.filter((item) => {
     return item._id.toString() !== value.toString();
   });
 }
@@ -72,29 +72,29 @@ const storage = multer.diskStorage({
     const ext = file.mimetype.split("/")[1];
 
     cb(null, uuidv4() + "." + ext);
-  }
+  },
 });
 
 const upload = multer({
   //multer settings
   storage: storage,
-  fileFilter: function(req, file, cb) {
+  fileFilter: function (req, file, cb) {
     checkFileType(file, cb);
   },
   limits: {
-    fileSize: 10485760 //10 MB
-  }
+    fileSize: 10485760, //10 MB
+  },
 }).single("photo");
 
 exports.upload = async (req, res, next) => {
-  upload(req, res, err => {
+  upload(req, res, (err) => {
     if (err) return res.status(400).json({ message: err.message });
 
     if (!req.file)
       return res.status(400).json({ message: "Please upload a file" });
 
     req.body.photo = req.file.filename;
-    Jimp.read(req.file.path, function(err, test) {
+    Jimp.read(req.file.path, function (err, test) {
       if (err) throw err;
       test
         .scaleToFit(480, Jimp.AUTO, Jimp.RESIZE_BEZIER)
@@ -115,8 +115,8 @@ exports.getPosts = (req, res) => {
           posts: [
             {
               $match: {
-                author: { $in: req.body.followings }
-              }
+                author: { $in: req.body.followings },
+              },
             },
             { $sort: { createdAt: -1 } },
             { $limit: 5 },
@@ -130,29 +130,29 @@ exports.getPosts = (req, res) => {
                 hashtags: 1,
                 location: 1,
                 likes: {
-                  $size: { $arrayElemAt: ["$likes.users_likes", 0] }
+                  $size: { $arrayElemAt: ["$likes.users_likes", 0] },
                 },
                 comments: {
-                  $size: "$comments"
+                  $size: "$comments",
                 },
                 description: 1,
                 "author._id": 1,
                 "author.username": 1,
-                "author.profilePicture": 1
-              }
-            }
+                "author.profilePicture": 1,
+              },
+            },
           ],
           total: [
             // Filter out documents without a price e.g., _id: 7
             {
               $match: {
-                author: { $in: req.body.followings }
-              }
+                author: { $in: req.body.followings },
+              },
             },
-            { $group: { _id: null, count: { $sum: 1 } } }
-          ]
-        }
-      }
+            { $group: { _id: null, count: { $sum: 1 } } },
+          ],
+        },
+      },
     ];
   } else {
     query = [
@@ -161,12 +161,12 @@ exports.getPosts = (req, res) => {
           $and: [
             {
               _id: {
-                $lt: mongoose.Types.ObjectId(req.body.lastId)
+                $lt: mongoose.Types.ObjectId(req.body.lastId),
               },
-              author: { $in: req.body.followings }
-            }
-          ]
-        }
+              author: { $in: req.body.followings },
+            },
+          ],
+        },
       },
       { $sort: { createdAt: -1 } },
       { $limit: 5 },
@@ -180,29 +180,29 @@ exports.getPosts = (req, res) => {
           hashtags: 1,
           location: 1,
           likes: {
-            $size: { $arrayElemAt: ["$likes.users_likes", 0] }
+            $size: { $arrayElemAt: ["$likes.users_likes", 0] },
           },
           comments: {
-            $size: "$comments"
+            $size: "$comments",
           },
           description: 1,
           "author._id": 1,
           "author.username": 1,
-          "author.profilePicture": 1
-        }
-      }
+          "author.profilePicture": 1,
+        },
+      },
     ];
   }
 
   Post.aggregate(query)
-    .then(data => {
+    .then((data) => {
       if (req.body.initialFetch && !data[0].total.length) {
         data[0].total.push({ _id: null, count: 0 }); //if user has no posts
       }
 
       res.status(200).json({ data });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err.message);
       res.status(500).json({ message: err.message });
     });
@@ -218,8 +218,8 @@ exports.getPostsByHashtag = (req, res) => {
           posts: [
             {
               $match: {
-                hashtags: req.body.hashtag
-              }
+                hashtags: req.body.hashtag,
+              },
             },
             { $sort: { createdAt: -1 } },
             { $limit: 10 },
@@ -233,29 +233,29 @@ exports.getPostsByHashtag = (req, res) => {
                 hashtags: 1,
                 location: 1,
                 likes: {
-                  $size: { $arrayElemAt: ["$likes.users_likes", 0] }
+                  $size: { $arrayElemAt: ["$likes.users_likes", 0] },
                 },
                 comments: {
-                  $size: "$comments"
+                  $size: "$comments",
                 },
                 description: 1,
                 "author._id": 1,
                 "author.username": 1,
-                "author.profilePicture": 1
-              }
-            }
+                "author.profilePicture": 1,
+              },
+            },
           ],
           total: [
             // Filter out documents without a price e.g., _id: 7
             {
               $match: {
-                hashtags: req.body.hashtag
-              }
+                hashtags: req.body.hashtag,
+              },
             },
-            { $group: { _id: null, count: { $sum: 1 } } }
-          ]
-        }
-      }
+            { $group: { _id: null, count: { $sum: 1 } } },
+          ],
+        },
+      },
     ];
   } else {
     query = [
@@ -264,12 +264,12 @@ exports.getPostsByHashtag = (req, res) => {
           $and: [
             {
               _id: {
-                $lt: mongoose.Types.ObjectId(req.body.lastId)
+                $lt: mongoose.Types.ObjectId(req.body.lastId),
               },
-              hashtags: req.body.hashtag
-            }
-          ]
-        }
+              hashtags: req.body.hashtag,
+            },
+          ],
+        },
       },
       { $sort: { createdAt: -1 } },
       { $limit: 10 },
@@ -283,29 +283,29 @@ exports.getPostsByHashtag = (req, res) => {
           hashtags: 1,
           location: 1,
           likes: {
-            $size: { $arrayElemAt: ["$likes.users_likes", 0] }
+            $size: { $arrayElemAt: ["$likes.users_likes", 0] },
           },
           comments: {
-            $size: "$comments"
+            $size: "$comments",
           },
           description: 1,
           "author._id": 1,
           "author.username": 1,
-          "author.profilePicture": 1
-        }
-      }
+          "author.profilePicture": 1,
+        },
+      },
     ];
   }
 
   Post.aggregate(query)
-    .then(data => {
+    .then((data) => {
       const { posts } = data[0];
       if (!posts.length) {
         return res.status(404).json({ message: "Hashtag not found" });
       }
       res.status(200).json({ data });
     })
-    .catch(err => res.status(500).json({ message: err.message }));
+    .catch((err) => res.status(500).json({ message: err.message }));
 };
 
 exports.getPostsByLocation = (req, res) => {
@@ -320,8 +320,8 @@ exports.getPostsByLocation = (req, res) => {
           posts: [
             {
               $match: {
-                "location.coordinates": [parseFloat(lat), parseFloat(lng)]
-              }
+                "location.coordinates": [parseFloat(lat), parseFloat(lng)],
+              },
             },
             { $sort: { createdAt: -1 } },
             { $limit: 10 },
@@ -335,28 +335,28 @@ exports.getPostsByLocation = (req, res) => {
                 hashtags: 1,
                 location: 1,
                 likes: {
-                  $size: { $arrayElemAt: ["$likes.users_likes", 0] }
+                  $size: { $arrayElemAt: ["$likes.users_likes", 0] },
                 },
                 comments: {
-                  $size: "$comments"
+                  $size: "$comments",
                 },
                 description: 1,
                 "author._id": 1,
                 "author.username": 1,
-                "author.profilePicture": 1
-              }
-            }
+                "author.profilePicture": 1,
+              },
+            },
           ],
           total: [
             {
               $match: {
-                "location.coordinates": [parseFloat(lat), parseFloat(lng)]
-              }
+                "location.coordinates": [parseFloat(lat), parseFloat(lng)],
+              },
             },
-            { $group: { _id: null, count: { $sum: 1 } } }
-          ]
-        }
-      }
+            { $group: { _id: null, count: { $sum: 1 } } },
+          ],
+        },
+      },
     ];
   } else {
     query = [
@@ -365,12 +365,12 @@ exports.getPostsByLocation = (req, res) => {
           $and: [
             {
               _id: {
-                $lt: mongoose.Types.ObjectId(req.body.lastId)
+                $lt: mongoose.Types.ObjectId(req.body.lastId),
               },
-              "location.coordinates": [parseFloat(lat), parseFloat(lng)]
-            }
-          ]
-        }
+              "location.coordinates": [parseFloat(lat), parseFloat(lng)],
+            },
+          ],
+        },
       },
       { $sort: { createdAt: -1 } },
       { $limit: 10 },
@@ -384,22 +384,22 @@ exports.getPostsByLocation = (req, res) => {
           hashtags: 1,
           location: 1,
           likes: {
-            $size: { $arrayElemAt: ["$likes.users_likes", 0] }
+            $size: { $arrayElemAt: ["$likes.users_likes", 0] },
           },
           comments: {
-            $size: "$comments"
+            $size: "$comments",
           },
           description: 1,
           "author._id": 1,
           "author.username": 1,
-          "author.profilePicture": 1
-        }
-      }
+          "author.profilePicture": 1,
+        },
+      },
     ];
   }
 
   Post.aggregate(query)
-    .then(data => {
+    .then((data) => {
       const { posts } = data[0];
 
       if (!posts.length) {
@@ -407,7 +407,7 @@ exports.getPostsByLocation = (req, res) => {
       }
       res.status(200).json({ data });
     })
-    .catch(err => res.status(500).json({ message: err.message }));
+    .catch((err) => res.status(500).json({ message: err.message }));
 };
 
 exports.getPost = (req, res) => {
@@ -422,53 +422,55 @@ exports.getPost = (req, res) => {
         tags: 1,
         location: 1,
         likes: {
-          $size: { $arrayElemAt: ["$likes.users_likes", 0] }
+          $size: { $arrayElemAt: ["$likes.users_likes", 0] },
         },
         comments: {
-          $size: "$comments"
+          $size: "$comments",
         },
         description: 1,
         "author._id": 1,
         "author.username": 1,
-        "author.profilePicture": 1
-      }
-    }
+        "author.profilePicture": 1,
+      },
+    },
   ])
-    .then(post => {
+    .then((post) => {
       if (!post.length) {
         return res.status(404).json({ message: "Not found" });
       }
       res.status(200).json({ post });
     })
-    .catch(err => res.status(500).json({ message: err.message }));
+    .catch((err) => res.status(500).json({ message: err.message }));
 };
 
 exports.createPost = (req, res) => {
   const hashtags = linkify // find hashtags
     .find(req.body.description)
-    .filter(link => {
+    .filter((link) => {
       if (link.type === "hashtag") {
         return link.value.substring(1);
       }
     })
-    .map(hashtag => hashtag.value.substring(1));
+    .map((hashtag) => hashtag.value.substring(1));
 
   const mentions = linkify // find mentions
     .find(req.body.description)
-    .filter(link => {
+    .filter((link) => {
       if (link.type === "mention") {
         return link.value.substring(1);
       }
     })
-    .map(hashtag => hashtag.value.substring(1));
+    .map((hashtag) => hashtag.value.substring(1));
 
-  const tags = JSON.parse(req.body.tags).map(tag => tag.value);
+  const tags = JSON.parse(req.body.tags).map((tag) => tag.value);
 
   const uniqueUsernames = [...new Set([...mentions, ...tags])];
 
   let newPost;
   if (req.body.coordinates) {
-    const coordinates = req.body.coordinates.split(",").map(x => parseFloat(x));
+    const coordinates = req.body.coordinates
+      .split(",")
+      .map((x) => parseFloat(x));
     newPost = new Post({
       author: req.userData.userId,
       description: req.body.description,
@@ -477,9 +479,9 @@ exports.createPost = (req, res) => {
       location: {
         type: "Point",
         coordinates: coordinates,
-        address: req.body.locationName
+        address: req.body.locationName,
       },
-      tags: JSON.parse(req.body.tags)
+      tags: JSON.parse(req.body.tags),
     });
   } else {
     newPost = new Post({
@@ -488,16 +490,16 @@ exports.createPost = (req, res) => {
       photo: req.body.photo,
       hashtags: [...new Set(hashtags)], // remove duplicates
 
-      tags: JSON.parse(req.body.tags)
+      tags: JSON.parse(req.body.tags),
     });
   }
 
   newPost
     .save()
-    .then(post => {
+    .then((post) => {
       User.find({ username: { $in: uniqueUsernames } })
         .select("_id")
-        .then(userIds => {
+        .then((userIds) => {
           const removedUserid = arrayRemove(userIds, req.userData.userId);
 
           if (removedUserid.length) {
@@ -505,27 +507,27 @@ exports.createPost = (req, res) => {
               sender: req.userData.userId,
               receiver: removedUserid,
               type: "post_tagged",
-              post: post._id
+              post: post._id,
             })
               .save()
-              .then(notification => {
+              .then((notification) => {
                 notification
                   .populate("post", "photo")
                   .execPopulate()
-                  .then(notification => {
+                  .then((notification) => {
                     User.findById(req.userData.userId)
                       .select("profilePicture username")
-                      .then(user => {
+                      .then((user) => {
                         notificationHandler.sendCommentTaggedNotification({
                           req,
                           removedUserid,
                           user,
-                          notification: notification.toObject()
+                          notification: notification.toObject(),
                         });
                       });
                   });
               })
-              .catch(err => {
+              .catch((err) => {
                 console.log(err);
                 res.status(400).json({ message: err.message });
               });
@@ -536,22 +538,22 @@ exports.createPost = (req, res) => {
         const data = {
           ...post.toObject(),
           author: [
-            { username: req.userData.username, profilePicture: "person.png" }
+            { username: req.userData.username, profilePicture: "person.png" },
           ],
           likes: 0,
-          comments: 0
+          comments: 0,
         };
         res.status(200).json({ post: data });
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
       res.status(500).json({ message: err.messages });
     });
 };
 
 function deletePostPhoto({ photo }) {
-  fs.unlink("./public/images/post-images/" + photo, err => {
+  fs.unlink("./public/images/post-images/" + photo, (err) => {
     if (err) {
       console.error(err);
       return;
@@ -559,7 +561,7 @@ function deletePostPhoto({ photo }) {
     console.log("removed");
   });
 
-  fs.unlink("./public/images/post-images/thumbnail/" + photo, err => {
+  fs.unlink("./public/images/post-images/thumbnail/" + photo, (err) => {
     if (err) {
       console.error(err);
       return;
@@ -570,36 +572,36 @@ function deletePostPhoto({ photo }) {
 
 exports.deletePost = (req, res) => {
   Post.findOneAndDelete({ _id: req.body.postId, author: req.userData.userId })
-    .then(post => {
+    .then((post) => {
       if (!post) return res.status(401).json({ message: "Failed to delete" });
 
       deletePostPhoto(post);
 
       Comment.deleteMany({
-        post: mongoose.Types.ObjectId(post._id)
-      }).then(docs => console.log(docs));
+        post: mongoose.Types.ObjectId(post._id),
+      }).then((docs) => console.log(docs));
       PostLike.findOneAndDelete({
-        post: mongoose.Types.ObjectId(post._id)
+        post: mongoose.Types.ObjectId(post._id),
       }).then(() => console.log("deleted post likes"));
       Notification.deleteMany({
-        post: mongoose.Types.ObjectId(post._id)
+        post: mongoose.Types.ObjectId(post._id),
       }).then(() => console.log("deleted notifications"));
 
       res.status(200).json({ message: "Deleted", id: post._id });
     })
-    .catch(err => res.status(400).json({ message: err.message }));
+    .catch((err) => res.status(400).json({ message: err.message }));
 };
 
 exports.likePost = (req, res) => {
   PostLike.updateOne(
     {
       post: req.body.postId,
-      "users_likes.author": { $ne: req.userData.userId }
+      "users_likes.author": { $ne: req.userData.userId },
     },
     {
-      $addToSet: { users_likes: { author: req.userData.userId } }
+      $addToSet: { users_likes: { author: req.userData.userId } },
     }
-  ).then(document => {
+  ).then((document) => {
     if (document.nModified === 1) {
       let notification;
       if (req.userData.userId !== req.body.authorId) {
@@ -607,13 +609,13 @@ exports.likePost = (req, res) => {
           sender: req.userData.userId,
           receiver: req.body.authorId,
           type: "like_post",
-          post: req.body.postId
+          post: req.body.postId,
         })
           .save()
-          .then(notification => {
+          .then((notification) => {
             return notification.populate("post", "photo").execPopulate();
           })
-          .then(notification => {
+          .then((notification) => {
             return notification.toObject();
           });
       }
@@ -625,18 +627,18 @@ exports.likePost = (req, res) => {
       ).select("profilePicture username");
 
       Promise.all([user, notification])
-        .then(values => {
+        .then((values) => {
           notificationHandler.sendLikePostNotification(req, values);
           return res
             .status(200)
             .json({ postId: req.body.postId, action: "liked" });
         })
-        .catch(err => console.log(err));
+        .catch((err) => console.log(err));
     } else {
       const postLike = PostLike.updateOne(
         { post: req.body.postId },
         {
-          $pull: { users_likes: { author: req.userData.userId } }
+          $pull: { users_likes: { author: req.userData.userId } },
         },
         { new: true, upsert: true }
       );
@@ -648,12 +650,12 @@ exports.likePost = (req, res) => {
       );
 
       Promise.all([postLike, user])
-        .then(values => {
+        .then((values) => {
           return res
             .status(200)
             .json({ postId: req.body.postId, action: "disliked" });
         })
-        .catch(err => console.log(err));
+        .catch((err) => console.log(err));
     }
   });
 };
@@ -661,7 +663,7 @@ exports.likePost = (req, res) => {
 exports.getPostLikes = (req, res) => {
   PostLike.find({ post: req.body.postId })
     .populate("users_likes.author", "username profilePicture")
-    .then(users => {
+    .then((users) => {
       res.status(200).json({ users });
     });
 };
