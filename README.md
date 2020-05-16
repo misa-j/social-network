@@ -14,7 +14,7 @@ Mini social network that I made as my first MERN stack project.
 ![](screenshots/Screenshot%20from%202020-02-29%2019-06-32.png)
 ![](screenshots/Screenshot%20from%202020-02-29%2019-07-23.png)
 ![](screenshots/Screenshot%20from%202020-02-29%2019-07-45.png)
-![](screenshots/Screenshot%20from%202020-02-29%2019-24-06.png)
+![](screenshots/Screenshot%20from%202020-02-29%2019-07-06.png)
 ![](screenshots/Screenshot%20from%202020-02-29%2002-19-26.png)
 ![](screenshots/Screenshot%20from%202020-02-29%2019-21-47.png)
 ![](screenshots/Screenshot%20from%202020-02-29%2019-01-38.png)
