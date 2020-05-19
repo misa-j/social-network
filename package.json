@@ -22,14 +22,13 @@
     "joi-objectid": "^3.0.1",
     "jsonwebtoken": "^8.5.1",
     "linkifyjs": "^2.1.8",
-    "moment": "^2.24.0",
     "mongoose": "^5.4.6",
     "morgan": "~1.9.0",
     "multer": "^1.4.1",
     "nodemailer": "^6.4.2",
     "nodemailer-express-handlebars": "^3.1.0",
-    "react-autosuggest": "^9.4.3",
     "socket.io": "^2.2.0",
     "uuid": "^3.3.2"
-  }
+  },
+  "devDependencies": {}
 }

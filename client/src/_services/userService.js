@@ -48,7 +48,6 @@ function getNewUsers(params) {
 function resetPassword(data) {
   const requestOptions = {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     headers: {
       Authorization: "Bearer " + data.jwt,
       "Content-Type": "application/json",
