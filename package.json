@@ -6,6 +6,7 @@
     "start": "node ./bin/www",
     "server": "nodemon ./bin/www",
     "client": "npm start --prefix client",
+    "test": "mocha --recursive --exit",
     "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "dependencies": {
@@ -30,5 +31,10 @@
     "socket.io": "^2.2.0",
     "uuid": "^3.3.2"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^7.1.2",
+    "mongodb-memory-server": "^6.6.0",
+    "supertest": "^4.0.2"
+  }
 }
