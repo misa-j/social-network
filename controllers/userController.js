@@ -298,7 +298,8 @@ exports.addUser = (req, res) => {
         return res.status(409).json({
           message: "Username exists",
         });
-      } else if (user.email === req.body.email) {
+      }
+      if (user.email === req.body.email) {
         return res.status(409).json({
           message: "Email exists",
         });
