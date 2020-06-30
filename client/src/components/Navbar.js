@@ -82,6 +82,9 @@ class Navbar extends Component {
     getUserDataF(history.location.pathname, (data) =>
       dispatch(userActions.getUserData(data))
     );
+
+    this.setState({ activePath: history.location.pathname });
+    dispatch(socketActions.connect());
   }
 
   handleNotificationPopupToggle = (e) => {
