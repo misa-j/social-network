@@ -16,6 +16,7 @@ const Message = mongoose.model("Message");
 const notificationHandler = require("../handlers/notificationHandler");
 const emailHandler = require("../handlers/emailHandler");
 const messageHandler = require("../handlers/messageHandler");
+const { use } = require("chai");
 
 // Check File Type
 function checkFileType(file, cb) {
@@ -469,17 +470,82 @@ exports.updateUser = (req, res) => {
               }
             );
 
-            res.status(200).json({ user, token: "Bearer " + token });
+            return res.status(200).json({ user, token: "Bearer " + token });
           })
           .catch((err) => {
             console.log(err);
-            res.status(500).json({ message: err });
+            return res.status(500).json({ message: err });
           });
       }
     });
 };
 
 exports.getUserData = (req, res, next) => {
+  let q;
+  if (req.body.profilePage) {
+    q = [
+      { $match: { _id: mongoose.Types.ObjectId(req.userData.userId) } },
+      {
+        $lookup: {
+          from: "followings",
+          localField: "_id",
+          foreignField: "user",
+          as: "followings",
+        },
+      },
+      {
+        $lookup: {
+          from: "followers",
+          localField: "_id",
+          foreignField: "user",
+          as: "followers",
+        },
+      },
+      {
+        $project: {
+          firstName: 1,
+          lastName: 1,
+          username: 1,
+          email: 1,
+          bio: 1,
+          profilePicture: 1,
+          followings: {
+            $size: { $arrayElemAt: ["$followings.following", 0] },
+          },
+          followers: {
+            $size: { $arrayElemAt: ["$followers.followers", 0] },
+          },
+          postLikes: "$postLikes.post",
+          commentLikes: "$commentLikes.comment",
+          commentReplyLikes: "$commentReplyLikes.comment",
+        },
+      },
+    ];
+  } else {
+    q = [
+      { $match: { _id: mongoose.Types.ObjectId(req.userData.userId) } },
+      {
+        $lookup: {
+          from: "followings",
+          localField: "_id",
+          foreignField: "user",
+          as: "followings",
+        },
+      },
+      {
+        $project: {
+          firstName: 1,
+          lastName: 1,
+          username: 1,
+          profilePicture: 1,
+          followingIds: { $arrayElemAt: ["$followings.following.user", 0] },
+          postLikes: "$postLikes.post",
+          commentLikes: "$commentLikes.comment",
+          commentReplyLikes: "$commentReplyLikes.comment",
+        },
+      },
+    ];
+  }
   const notification = Notification.find({
     receiver: mongoose.Types.ObjectId(req.userData.userId),
     read: false,
@@ -498,50 +564,12 @@ exports.getUserData = (req, res, next) => {
     read: false,
   }).countDocuments();
 
-  const user = User.aggregate([
-    { $match: { _id: mongoose.Types.ObjectId(req.userData.userId) } },
-    {
-      $lookup: {
-        from: "followings",
-        localField: "_id",
-        foreignField: "user",
-        as: "followings",
-      },
-    },
-    {
-      $lookup: {
-        from: "followers",
-        localField: "_id",
-        foreignField: "user",
-        as: "followers",
-      },
-    },
-    {
-      $project: {
-        firstName: 1,
-        lastName: 1,
-        username: 1,
-        email: 1,
-        bio: 1,
-        notifications: 1,
-        profilePicture: 1,
-        followings: {
-          $size: { $arrayElemAt: ["$followings.following", 0] },
-        },
-        followers: {
-          $size: { $arrayElemAt: ["$followers.followers", 0] },
-        },
-        followingIds: { $arrayElemAt: ["$followings.following.user", 0] },
-        postLikes: "$postLikes.post",
-        commentLikes: "$commentLikes.comment",
-        commentReplyLikes: "$commentReplyLikes.comment",
-      },
-    },
-  ]);
+  const user = User.aggregate(q);
 
   Promise.all([user, notification, posts, messages, allNotification])
     .then((values) => {
       const user = values[0];
+
       if (user.length < 1) {
         return res.status(404).json({
           message: "User not found",
@@ -549,21 +577,7 @@ exports.getUserData = (req, res, next) => {
       }
 
       const data = {
-        _id: user[0]._id,
-        firstName: user[0].firstName,
-        lastName: user[0].lastName,
-        bio: user[0].bio,
-        profilePicture: user[0].profilePicture,
-        username: user[0].username,
-        email: user[0].email,
-        postLikes: user[0].postLikes,
-        commentLikes: user[0].commentLikes,
-        commentReplyLikes: user[0].commentReplyLikes,
-        followings: user[0].followings,
-        followers: user[0].followers,
-        followingIds: user[0].followingIds || [],
-        follwingUsers: [],
-        followerUsers: [],
+        ...user[0],
         notificationsCount: values[1],
         postsCount: values[2],
         messagesCount: values[3],
@@ -574,14 +588,14 @@ exports.getUserData = (req, res, next) => {
       next();
     })
     .catch((err) => {
-      res.status(500).json({
+      return res.status(500).json({
         message: err.message,
       });
     });
 };
 
 exports.sendUserData = (req, res) => {
-  res.status(200).json({ user: req.body.user });
+  return res.status(200).json({ user: req.body.user });
 };
 
 exports.followUser = (req, res) => {
@@ -608,7 +622,11 @@ exports.followUser = (req, res) => {
           });
       }
     })
-    .catch((err) => console.log(err.message));
+    .catch((err) => {
+      return res.status(500).json({
+        message: err.message,
+      });
+    });
 
   // if user follows itself
   if (req.userData.userId !== req.body.userId) {
@@ -679,7 +697,7 @@ exports.followUser = (req, res) => {
       }
     });
   } else {
-    res.status(403).json({ message: "Failed to follow" });
+    return res.status(403).json({ message: "Failed to follow" });
   }
 };
 
@@ -694,13 +712,9 @@ exports.getNewUsers = (req, res) => {
     Promise.all([usersCount, users])
       .then((response) => {
         const [usersCount, users] = response;
-        res.status(200).json({ usersCount, users });
+        return res.status(200).json({ usersCount, users });
       })
-      .catch((err) => {
-        return res.status(500).json({
-          message: err.message,
-        });
-      });
+      .catch((err) => res.status(500).json({ message: err.message }));
   } else {
     User.find({ _id: { $lt: req.body.lastId } })
       .select("username date profilePicture")
@@ -741,7 +755,6 @@ exports.getUserProfileData = (req, res, next) => {
         firstName: 1,
         lastName: 1,
         username: 1,
-        email: 1,
         bio: 1,
         profilePicture: 1,
         followings: {
@@ -766,30 +779,20 @@ exports.getUserProfileData = (req, res, next) => {
         .countDocuments()
         .then((postsCount) => {
           let data = {
-            _id: user[0]._id,
-            firstName: user[0].firstName,
-            lastName: user[0].lastName,
-            profilePicture: user[0].profilePicture,
-            username: user[0].username,
-            email: user[0].email,
-            bio: user[0].bio,
-            followings: user[0].followings,
-            followers: user[0].followers,
-            follwingUsers: [],
-            followerUsers: [],
+            ...user[0],
             postsCount,
           };
           req.body.user = data;
           next();
         })
         .catch((err) => {
-          res.status(500).json({
+          return res.status(500).json({
             message: err.message,
           });
         });
     })
     .catch((err) => {
-      res.status(500).json({
+      return res.status(500).json({
         message: err.message,
       });
     });
@@ -841,7 +844,6 @@ exports.getPosts = (req, res) => {
         photo: 1,
         createdAt: 1,
         tags: 1,
-        passing_scores: 1,
         hashtags: 1,
         location: 1,
         likes: {
@@ -864,62 +866,66 @@ exports.getPosts = (req, res) => {
 };
 
 exports.getUserPosts = (req, res, next) => {
-  Post.aggregate([
-    {
-      $match: { author: mongoose.Types.ObjectId(req.body.user._id) },
-    },
-    { $sort: { createdAt: -1 } },
-    { $limit: 10 },
-    {
-      $lookup: {
-        from: "users",
-        localField: "author",
-        foreignField: "_id",
-        as: "author",
+  if (req.body.profilePage) {
+    Post.aggregate([
+      {
+        $match: { author: mongoose.Types.ObjectId(req.body.user._id) },
       },
-    },
-    {
-      $lookup: {
-        from: "postlikes",
-        localField: "_id",
-        foreignField: "post",
-        as: "likes",
-      },
-    },
-    {
-      $lookup: {
-        from: "comments",
-        localField: "_id",
-        foreignField: "post",
-        as: "comments",
-      },
-    },
-    {
-      $project: {
-        photo: 1,
-        createdAt: 1,
-        tags: 1,
-        location: 1,
-        likes: {
-          $size: { $arrayElemAt: ["$likes.users_likes", 0] },
+      { $sort: { createdAt: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: "users",
+          localField: "author",
+          foreignField: "_id",
+          as: "author",
         },
-        comments: {
-          $size: { $ifNull: ["$comments", []] },
-        },
-        description: 1,
-        "author._id": 1,
-        "author.username": 1,
       },
-    },
-  ])
-    .then((posts) => {
-      req.body.user.posts = posts;
-      next();
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ message: err.message });
-    });
+      {
+        $lookup: {
+          from: "postlikes",
+          localField: "_id",
+          foreignField: "post",
+          as: "likes",
+        },
+      },
+      {
+        $lookup: {
+          from: "comments",
+          localField: "_id",
+          foreignField: "post",
+          as: "comments",
+        },
+      },
+      {
+        $project: {
+          photo: 1,
+          createdAt: 1,
+          tags: 1,
+          location: 1,
+          likes: {
+            $size: { $arrayElemAt: ["$likes.users_likes", 0] },
+          },
+          comments: {
+            $size: { $ifNull: ["$comments", []] },
+          },
+          description: 1,
+          "author._id": 1,
+          "author.username": 1,
+        },
+      },
+    ])
+      .then((posts) => {
+        req.body.user.posts = posts;
+        next();
+      })
+      .catch((err) => {
+        console.log(err);
+        return res.status(500).json({ message: err.message });
+      });
+  } else {
+    next();
+  }
 };
 
 exports.searchUsersByUsername = (req, res) => {

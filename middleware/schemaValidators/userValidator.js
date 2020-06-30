@@ -128,7 +128,8 @@ exports.changeActivityStatus = (req, res, next) => {
 
 exports.getUserData = (req, res, next) => {
   const schema = Joi.object({
-    initialFetch: Joi.boolean().required(),
+    profilePage: Joi.boolean().required(),
+    userProfile: Joi.boolean().required(),
   });
 
   const { error, value } = schema.validate(req.body);
@@ -154,6 +155,7 @@ exports.getPosts = (req, res, next) => {
 exports.getUserProfileData = (req, res, next) => {
   const schema = Joi.object({
     username: Joi.string().min(3).max(30).required(),
+    profilePage: Joi.boolean().required(),
   });
 
   const { error, value } = schema.validate(req.body);

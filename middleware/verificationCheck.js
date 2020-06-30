@@ -5,26 +5,24 @@ const bcrypt = require("bcryptjs");
 exports.verificationCheck = (req, res, next) => {
   User.aggregate([
     {
-      $match: { $or: [{ email: req.body.email }, { username: req.body.email }] }
+      $match: {
+        $or: [{ email: req.body.email }, { username: req.body.email }],
+      },
     },
     {
       $project: {
         password: 1,
-        activated: 1
-      }
-    }
+        activated: 1,
+      },
+    },
   ])
-    .then(users => {
+    .then((users) => {
       if (users.length < 1) {
-        return res.status(400).json({
-          message: "Incorrect credentials."
-        });
+        return res.status(400).json({ message: "Incorrect credentials." });
       } else {
         bcrypt.compare(req.body.password, users[0].password, (err, result) => {
           if (err) {
-            return res.status(400).json({
-              message: "Incorrect credentials."
-            });
+            return res.status(400).json({ message: "Incorrect credentials." });
           }
           if (result) {
             if (!users[0].activated) {
@@ -36,8 +34,8 @@ exports.verificationCheck = (req, res, next) => {
         });
       }
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
-      res.status(500).json({ message: err });
+      return res.status(500).json({ message: err });
     });
 };

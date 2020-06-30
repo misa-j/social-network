@@ -23,6 +23,20 @@ function trigger(image, name) {
   );
 }
 
+function getUserDataF(path, cb) {
+  const params = {
+    profilePage: false,
+    userProfile: false,
+  };
+  if (path === "/") {
+    cb({ ...params });
+  } else if (path === "/profile") {
+    cb({ ...params, profilePage: true });
+  } else {
+    cb({ ...params, userProfile: true });
+  }
+}
+
 class Navbar extends Component {
   constructor() {
     super();
@@ -35,35 +49,45 @@ class Navbar extends Component {
           text: "Account",
           icon: "user",
           value: "profile",
-          active: false
+          active: false,
         },
         {
           key: "sign-out",
           text: "Sign Out",
           icon: "sign out",
           value: "login",
-          active: false
-        }
+          active: false,
+        },
       ],
-      activePath: ""
+      activePath: "",
+    };
+    this.params = {
+      homePage: false,
+      profilePage: false,
+      userProfile: false,
     };
   }
 
   componentDidMount() {
     const { dispatch } = this.props;
 
-    history.listen(location => {
+    history.listen((location) => {
       this.setState({ activePath: location.pathname });
+
+      getUserDataF(location.pathname, (data) =>
+        dispatch(userActions.getUserData(data))
+      );
     });
-    this.setState({ activePath: history.location.pathname });
-    dispatch(userActions.getUserData({ initialFetch: true }));
-    dispatch(socketActions.connect());
+
+    getUserDataF(history.location.pathname, (data) =>
+      dispatch(userActions.getUserData(data))
+    );
   }
 
-  handleNotificationPopupToggle = e => {
+  handleNotificationPopupToggle = (e) => {
     e.stopPropagation();
     const { dispatch, notifications } = this.props;
-    const ids = notifications.filter(e => !e.read).map(e => e._id);
+    const ids = notifications.filter((e) => !e.read).map((e) => e._id);
 
     dispatch(notificationActions.toggleNotificationPopup());
 
@@ -133,7 +157,7 @@ class Navbar extends Component {
 
                   <NotificationPopup>
                     <Menu.Item
-                      onClick={e => this.handleNotificationPopupToggle(e)}
+                      onClick={(e) => this.handleNotificationPopupToggle(e)}
                     >
                       <Icon name="bell" size="big" />
                       {user.data.notificationsCount !== 0 ? (
@@ -189,12 +213,12 @@ class Navbar extends Component {
   }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   user: state.user,
   notifications: state.notification.notifications,
   answeringModal: state.chat.answeringModal,
   currentRoom: state.chat.currentRoom,
-  roomId: state.chat.roomId
+  roomId: state.chat.roomId,
 });
 
 const connectNavbar = connect(mapStateToProps)(Navbar);

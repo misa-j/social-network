@@ -177,7 +177,7 @@ function getUserProfileData(username) {
       Authorization: JSON.parse(localStorage.getItem("user")).token,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ username: username.trim() }),
+    body: JSON.stringify({ username: username.trim(), profilePage: true }),
   };
 
   return fetch("/api/user/getProfilePageData", requestOptions)

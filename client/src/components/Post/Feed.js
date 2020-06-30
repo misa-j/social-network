@@ -18,7 +18,7 @@ class Feed extends Component {
     dispatch(
       postActions.fetchPosts({
         initialFetch: false,
-        lastId: posts[posts.length - 1]._id
+        lastId: posts[posts.length - 1]._id,
       })
     );
   };
@@ -26,7 +26,7 @@ class Feed extends Component {
   render() {
     const { loadingUser, posts, totalPosts } = this.props;
     const hasMore = posts.length === totalPosts ? false : true;
-    const feedPosts = posts.map(post => (
+    const feedPosts = posts.map((post) => (
       <Post key={post._id} post={{ ...post, feed: true }} />
     ));
 
@@ -55,10 +55,10 @@ class Feed extends Component {
   }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   posts: state.post.posts,
   totalPosts: state.post.totalPosts,
-  loadingUser: state.user.loadingUser
+  loadingUser: state.user.loadingUser,
 });
 
 export default connect(mapStateToProps)(Feed);

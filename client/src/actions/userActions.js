@@ -165,9 +165,10 @@ function getUserData(queryParams) {
 
     userService.getUserData(queryParams).then(
       (res) => {
-        res.user.posts.forEach((post) =>
-          dispatch({ type: postConstants.INIT_COMMENT, postId: post._id })
-        );
+        res.user.posts &&
+          res.user.posts.forEach((post) =>
+            dispatch({ type: postConstants.INIT_COMMENT, postId: post._id })
+          );
         dispatch(success(res.user));
       },
       (error) => {
@@ -283,9 +284,10 @@ function getUserProfileData(username) {
         }
         document.title = "@" + response.user.username + " | social-network";
         dispatch(success(response));
-        response.user.posts.forEach((post) =>
-          dispatch({ type: postConstants.INIT_COMMENT, postId: post._id })
-        );
+        response.user.posts &&
+          response.user.posts.forEach((post) =>
+            dispatch({ type: postConstants.INIT_COMMENT, postId: post._id })
+          );
       },
       (error) => {
         console.log(error);

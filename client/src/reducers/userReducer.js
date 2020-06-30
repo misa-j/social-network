@@ -11,16 +11,28 @@ export function user(
     deleting: false,
     hasError: false,
     data: {
-      profilePicture: "person.png",
+      _id: "",
       username: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      profilePicture: "person.png",
+      bio: "",
+      followers: 0,
+      followings: 0,
+      postsCount: 0,
+      allNotifications: 0,
       notificationsCount: 0,
       messagesCount: 0,
+      followingIds: [],
       posts: [],
       follwingUsers: [],
       followerUsers: [],
       notifications: [],
-      postLikes: []
-    }
+      postLikes: [],
+      commentLikes: [],
+      commentReplyLikes: [],
+    },
   },
   action
 ) {
@@ -28,12 +40,12 @@ export function user(
     case userConstants.GETUSER_REQUEST:
       return {
         ...state,
-        loadingUser: true
+        loadingUser: true,
       };
     case userConstants.USER_UPDATE_REQUEST: {
       return {
         ...state,
-        updaingUser: true
+        updaingUser: true,
       };
     }
     case userConstants.USER_UPDATE_SUCCESS:
@@ -48,40 +60,40 @@ export function user(
           lastName,
           username,
           email,
-          bio
-        }
+          bio,
+        },
       };
     case userConstants.USER_UPDATE_FAILURE:
       return {
         ...state,
         updaingUser: false,
-        hasError: action.error
+        hasError: action.error,
       };
     case userConstants.GETUSER_SUCCESS:
       return {
         ...state,
         data: {
           ...state.data,
-          ...action.user
+          ...action.user,
         },
-        loadingUser: false
+        loadingUser: false,
       };
     case userConstants.USER_UPDATE_PROFILEPICTURE_SUCCESS:
       return {
         ...state,
         data: {
           ...state.data,
-          profilePicture: action.user.profilePicture
+          profilePicture: action.user.profilePicture,
         },
-        loadingUser: false
+        loadingUser: false,
       };
     case userConstants.USER_LIKE_COMMENT:
       return {
         ...state,
         data: {
           ...state.data,
-          commentLikes: [...state.data.commentLikes, action.comment.commentId]
-        }
+          commentLikes: [...state.data.commentLikes, action.comment.commentId],
+        },
       };
 
     case userConstants.USER_DISLIKE_COMMENT:
@@ -90,9 +102,9 @@ export function user(
         data: {
           ...state.data,
           commentLikes: state.data.commentLikes.filter(
-            e => e !== action.comment.commentId
-          )
-        }
+            (e) => e !== action.comment.commentId
+          ),
+        },
       };
 
     case userConstants.USER_LIKE_COMMENT_REPLY:
@@ -102,9 +114,9 @@ export function user(
           ...state.data,
           commentReplyLikes: [
             ...state.data.commentReplyLikes,
-            action.comment.commentId
-          ]
-        }
+            action.comment.commentId,
+          ],
+        },
       };
 
     case userConstants.USER_DISLIKE_COMMENT_REPLY:
@@ -113,23 +125,23 @@ export function user(
         data: {
           ...state.data,
           commentReplyLikes: state.data.commentReplyLikes.filter(
-            e => e !== action.comment.commentId
-          )
-        }
+            (e) => e !== action.comment.commentId
+          ),
+        },
       };
     case commentConstants.ADD_COMMENT_SUCCESS:
       return {
         ...state,
         data: {
           ...state.data,
-          posts: state.data.posts.map(post => {
+          posts: state.data.posts.map((post) => {
             if (post._id === action.comment.post) {
               return { ...post, comments: post.comments + 1 };
             } else {
               return post;
             }
-          })
-        }
+          }),
+        },
       };
     case postConstants.LIKE_POST:
       return {
@@ -137,18 +149,18 @@ export function user(
         data: {
           ...state.data,
           postLikes: [...state.data.postLikes, action.post.postId],
-          posts: state.data.posts.map(post => {
+          posts: state.data.posts.map((post) => {
             if (post._id === action.post.postId) {
               return {
                 ...post,
-                likes: post.likes + 1
+                likes: post.likes + 1,
               };
             }
             return {
-              ...post
+              ...post,
             };
-          })
-        }
+          }),
+        },
       };
 
     case postConstants.DISLIKE_POST:
@@ -156,19 +168,21 @@ export function user(
         ...state,
         data: {
           ...state.data,
-          postLikes: state.data.postLikes.filter(e => e !== action.post.postId),
-          posts: state.data.posts.map(post => {
+          postLikes: state.data.postLikes.filter(
+            (e) => e !== action.post.postId
+          ),
+          posts: state.data.posts.map((post) => {
             if (post._id === action.post.postId) {
               return {
                 ...post,
-                likes: post.likes - 1
+                likes: post.likes - 1,
               };
             }
             return {
-              ...post
+              ...post,
             };
-          })
-        }
+          }),
+        },
       };
 
     case userConstants.FOLLOW_USER:
@@ -176,8 +190,8 @@ export function user(
         ...state,
         data: {
           ...state.data,
-          followingIds: [...state.data.followingIds, action.user.userId]
-        }
+          followingIds: [...state.data.followingIds, action.user.userId],
+        },
       };
     case userConstants.UNFOLLOW_USER:
       return {
@@ -185,22 +199,22 @@ export function user(
         data: {
           ...state.data,
           followingIds: state.data.followingIds.filter(
-            e => e !== action.user.userId
-          )
-        }
+            (e) => e !== action.user.userId
+          ),
+        },
       };
     case userConstants.GET_POSTS:
       return {
         ...state,
         data: {
           ...state.data,
-          posts: [...state.data.posts, ...action.posts]
-        }
+          posts: [...state.data.posts, ...action.posts],
+        },
       };
     case postConstants.ADD_POST_REQUEST:
       return {
         ...state,
-        posting: true
+        posting: true,
       };
     case postConstants.ADD_POST_SUCCESS:
       return {
@@ -208,22 +222,22 @@ export function user(
         data: {
           ...state.data,
           posts: [action.post, ...state.data.posts],
-          postsCount: state.data.postsCount + 1
+          postsCount: state.data.postsCount + 1,
         },
-        posting: false
+        posting: false,
       };
     case notificationConstants.READ_NOTIFICATIOS:
       return {
         ...state,
         data: {
           ...state.data,
-          notificationsCount: state.data.notificationsCount - action.readCount
-        }
+          notificationsCount: state.data.notificationsCount - action.readCount,
+        },
       };
     case postConstants.POST_DELETE_REQUEST:
       return {
         ...state,
-        deleting: true
+        deleting: true,
       };
     case postConstants.POST_DELETE_SUCCESS:
       return {
@@ -231,10 +245,12 @@ export function user(
 
         data: {
           ...state.data,
-          posts: state.data.posts.filter(post => post._id !== action.result.id),
-          postsCount: state.data.postsCount - 1
+          posts: state.data.posts.filter(
+            (post) => post._id !== action.result.id
+          ),
+          postsCount: state.data.postsCount - 1,
         },
-        deleting: false
+        deleting: false,
       };
 
     case notificationConstants.ADD_NOTIFICATION:
@@ -242,8 +258,8 @@ export function user(
         ...state,
         data: {
           ...state.data,
-          notificationsCount: state.data.notificationsCount + 1
-        }
+          notificationsCount: state.data.notificationsCount + 1,
+        },
       };
     case postConstants.GET_POST:
       return {
@@ -251,24 +267,24 @@ export function user(
         openedPost: {
           ...state.openedPost,
           loadingPost: false,
-          data: action.post[0]
-        }
+          data: action.post[0],
+        },
       };
     case userConstants.GET_USER_FOLLOWERS:
       return {
         ...state,
         data: {
           ...state.data,
-          followerUsers: action.users
-        }
+          followerUsers: action.users,
+        },
       };
     case userConstants.GET_USER_FOLLOWINGS:
       return {
         ...state,
         data: {
           ...state.data,
-          follwingUsers: action.users
-        }
+          follwingUsers: action.users,
+        },
       };
 
     case chatConstants.INC_MESSAGE_COUNT:
@@ -276,16 +292,16 @@ export function user(
         ...state,
         data: {
           ...state.data,
-          messagesCount: state.data.messagesCount + 1
-        }
+          messagesCount: state.data.messagesCount + 1,
+        },
       };
     case chatConstants.READ_MESSAGES:
       return {
         ...state,
         data: {
           ...state.data,
-          messagesCount: state.data.messagesCount - action.messageIds.length
-        }
+          messagesCount: state.data.messagesCount - action.messageIds.length,
+        },
       };
     default:
       return state;
