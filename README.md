@@ -74,6 +74,7 @@ EMAILUSER="example@gmail.com"
 EMAILPASS="example"
 HOST="your ip eg. http://192.168.0.14:5000"
 ENABLE_SEND_EMAIL="true or false" // false if you don't want to set it up
+TEST_DATABASE="testing db"
 ```
 
 3. Go into `client/src/_services/socketService.js` and replace
@@ -93,11 +94,6 @@ with your local IP address on port 5000 eg.
 ```
 npm run dev
 ```
-
-## Acknowledgments
-
-- [Layout for proflie page](https://codepen.io/GeorgePark/pen/VXrwOP)
-- [Layout for messenger](https://codepen.io/merong/pen/JjoKKZg)
 
 ## Contribute
 
