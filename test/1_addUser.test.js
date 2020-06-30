@@ -1,15 +1,17 @@
 const expect = require("chai").expect;
 const request = require("supertest");
-const mongoose = require("mongoose");
+const app = require("../app");
+const dbHandler = require("./db-handler");
+const { getUser, populate } = require("./data/user");
 const User = require("../models/User");
 const Followers = require("../models/Followers");
 const Following = require("../models/Following");
-const app = require("../app");
-const dbHandler = require("./db-handler");
-const userConstsnts = require("./constants/user");
-const { generateData } = require("./data/user");
 
-before(async () => await dbHandler.connect());
+before(async () => {
+  await dbHandler.closeDatabase();
+  await dbHandler.connect();
+  populate();
+});
 
 //afterEach(async () => await dbHandler.clearDatabase());
 
@@ -20,9 +22,12 @@ after(async () => {
 
 describe("/api/user/signup", () => {
   it("should create user", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.GET_USER))
+      .send(user)
       .expect(201)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -37,7 +42,9 @@ describe("/api/user/signup", () => {
   });
 
   it("check if documents in collections are created", (done) => {
-    const user = generateData(userConstsnts.GET_USER);
+    const user = {
+      ...getUser(0),
+    };
     User.find({ username: user.username })
       .select("_id")
       .then((user) => {
@@ -73,9 +80,12 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user if username exists", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.GET_USER))
+      .send(user)
       .expect(409)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -86,9 +96,12 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user if email exists", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send({ ...generateData(userConstsnts.GET_USER), username: "janedoe" })
+      .send({ ...user, username: "janedoe" })
       .expect(409)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -99,9 +112,12 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user if username is invalid", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send({ ...generateData(userConstsnts.GET_USER), username: "john doe" })
+      .send({ ...user, username: "john doe" })
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -111,9 +127,12 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user if username is invalid", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send({ ...generateData(userConstsnts.GET_USER), username: "john@doe" })
+      .send({ ...user, username: "john@doe" })
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -123,9 +142,12 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user if email is invalid", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send({ ...generateData(userConstsnts.GET_USER), email: "janedoe.com" })
+      .send({ ...user, email: "janedoe.com" })
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -135,9 +157,12 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user if email is invalid", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send({ ...generateData(userConstsnts.GET_USER), email: "janedoe@com" })
+      .send({ ...user, email: "janedoe@com" })
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -147,9 +172,12 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user if email is invalid", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send({ ...generateData(userConstsnts.GET_USER), email: "janedoecom" })
+      .send({ ...user, email: "janedoecom" })
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -161,9 +189,13 @@ describe("/api/user/signup", () => {
   // tests with deleted fileds
 
   it("should not create user without firstName", (done) => {
+    const user = {
+      ...getUser(0),
+    };
+    delete user.firstName;
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.DELETE_FIRST_NAME))
+      .send(user)
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -174,9 +206,13 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user without lastName", (done) => {
+    const user = {
+      ...getUser(0),
+    };
+    delete user.lastName;
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.DELETE_LAST_NAME))
+      .send(user)
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -187,9 +223,13 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user without username", (done) => {
+    const user = {
+      ...getUser(0),
+    };
+    delete user.username;
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.DELETE_USERNAME))
+      .send(user)
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -200,9 +240,13 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user without email", (done) => {
+    const user = {
+      ...getUser(0),
+    };
+    delete user.email;
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.DELETE_EMAIL))
+      .send(user)
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -213,9 +257,13 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user without password", (done) => {
+    const user = {
+      ...getUser(0),
+    };
+    delete user.password;
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.DELETE_PASSWORD))
+      .send(user)
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -226,9 +274,13 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user without retypepassword", (done) => {
+    const user = {
+      ...getUser(0),
+    };
+    delete user.retypepassword;
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.DELETE_RETYPE_PASSWORD))
+      .send(user)
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -241,9 +293,12 @@ describe("/api/user/signup", () => {
   // tests with empty fileds
 
   it("should not create user if firstname is empty", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.EMPTY_FIRST_NAME))
+      .send({ ...user, firstName: "" })
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -256,9 +311,12 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user if lastname is empty", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.EMPTY_LAST_NAME))
+      .send({ ...user, lastName: "" })
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -271,9 +329,12 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user if username is empty", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.EMPTY_USERNAME))
+      .send({ ...user, username: "" })
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -286,9 +347,12 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user if email is empty", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.EMPTY_EMAIL))
+      .send({ ...user, email: "" })
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -299,9 +363,12 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user if password is empty", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.EMPTY_PASSWORD))
+      .send({ ...user, password: "" })
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -314,9 +381,12 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user if retypepassword is empty", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.EMPTY_RETYPE_PASSWORD))
+      .send({ ...user, retypepassword: "" })
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -331,9 +401,12 @@ describe("/api/user/signup", () => {
   // tests with too long values
 
   it("should not create user if firstname is too long", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.TOOLONG_FIRST_NAME))
+      .send({ ...user, firstName: "a".repeat(31) })
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -346,9 +419,12 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user if lastname is too long", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.TOOLONG_LAST_NAME))
+      .send({ ...user, lastName: "a".repeat(31) })
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -361,9 +437,12 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user if username is too long", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.TOOLONG_USERNAME))
+      .send({ ...user, username: "a".repeat(31) })
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -376,9 +455,12 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user if email is too long", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.TOOLONG_EMAIL))
+      .send({ ...user, email: "a".repeat(31) })
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -391,9 +473,12 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user if password is too long", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.TOOLONG_PASSWORD))
+      .send({ ...user, password: "a".repeat(31) })
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
@@ -406,9 +491,12 @@ describe("/api/user/signup", () => {
   });
 
   it("should not create user if retypepassword is too long", (done) => {
+    const user = {
+      ...getUser(0),
+    };
     request(app)
       .post("/api/user/signup")
-      .send(generateData(userConstsnts.TOOLONG_RETYPE_PASSWORD))
+      .send({ ...user, retypepassword: "a".repeat(31) })
       .expect(400)
       .then((res) => {
         expect(res.body).to.have.property("message");
