@@ -16,7 +16,6 @@ const Message = mongoose.model("Message");
 const notificationHandler = require("../handlers/notificationHandler");
 const emailHandler = require("../handlers/emailHandler");
 const messageHandler = require("../handlers/messageHandler");
-const { use } = require("chai");
 
 // Check File Type
 function checkFileType(file, cb) {

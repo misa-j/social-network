@@ -7,6 +7,9 @@ client/build
 client/.gitignore
 client/README.md
 
+public/*
+!public/images
+
 public/images/chat-images/*
 !public/images/chat-images/placeholder.png
 
@@ -21,4 +24,3 @@ public/images/profile-picture/*
 !public/images/profile-picture/person.png
 public/images/profile-picture/100x100/*
 !public/images/profile-picture/100x100/person.png
-
