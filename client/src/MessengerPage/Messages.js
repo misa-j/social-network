@@ -13,7 +13,7 @@ hashtag(linkify);
 mention(linkify);
 
 const linkifyOptions = {
-  formatHref: function(href, type) {
+  formatHref: function (href, type) {
     if (type === "hashtag") {
       href = "/hashtags/" + href.substring(1);
     }
@@ -24,31 +24,36 @@ const linkifyOptions = {
   },
   attributes: {
     target: {
-      url: "_blank"
-    }
-  }
+      url: "_blank",
+    },
+  },
 };
+
+function ShowImage({ show, image }) {
+  return show ? (
+    <img src={`/images/profile-picture/100x100/${image}`} alt="" />
+  ) : (
+    <div></div>
+  );
+}
 
 const MessengerMessages = ({
   message,
   userId,
   profilePicture,
-  currentRoom
+  currentRoom,
 }) => {
   if (message.sender === userId) {
     if (message.sent === false) {
       return (
         <li className="replies" key={message.uuid}>
-          <img
-            src={`/images/profile-picture/100x100/${profilePicture}`}
-            alt=""
-          />
+          <ShowImage image={profilePicture} show={message.picture}></ShowImage>
           <p
             style={{
               backgroundColor: "#f5f5f5",
               color: "black",
               border: "1px solid grey",
-              wordWrap: "break-word"
+              wordWrap: "break-word",
             }}
           >
             <Linkify options={linkifyOptions}>{message.value}</Linkify>
@@ -59,10 +64,7 @@ const MessengerMessages = ({
     if (message.messageType === "text") {
       return (
         <li className="replies">
-          <img
-            src={`/images/profile-picture/100x100/${profilePicture}`}
-            alt=""
-          />
+          <ShowImage image={profilePicture} show={message.picture}></ShowImage>
           <Popup
             content={
               dayjs(message.createdAt).fromNow() + ", seen:" + message.read
@@ -78,10 +80,7 @@ const MessengerMessages = ({
     } else {
       return (
         <li className="replies">
-          <img
-            src={`/images/profile-picture/100x100/${profilePicture}`}
-            alt=""
-          />
+          <ShowImage image={profilePicture} show={message.picture}></ShowImage>
           <Popup
             content={
               dayjs(message.createdAt).fromNow() + ", seen:" + message.read
@@ -92,7 +91,7 @@ const MessengerMessages = ({
                   borderRadius: "3%",
                   objectFit: "cover",
                   width: "40%",
-                  height: "20%"
+                  height: "20%",
                 }}
                 src={`/images/chat-images/${message.photo}`}
                 alt=""
@@ -106,16 +105,16 @@ const MessengerMessages = ({
     if (message.sent === false) {
       return (
         <li className="sent" key={message.uuid}>
-          <img
-            src={`/images/profile-picture/100x100/${currentRoom.user.profilePicture}`}
-            alt=""
-          />
+          <ShowImage
+            image={currentRoom.user.profilePicture}
+            show={message.picture}
+          ></ShowImage>
           <p
             style={{
               backgroundColor: "#f5f5f5",
               color: "black",
               border: "1px solid grey",
-              wordWrap: "break-word"
+              wordWrap: "break-word",
             }}
           >
             <Linkify options={linkifyOptions}>{message.value}</Linkify>
@@ -126,10 +125,11 @@ const MessengerMessages = ({
     if (message.messageType === "text") {
       return (
         <li className="sent">
-          <img
-            src={`/images/profile-picture/100x100/${currentRoom.user.profilePicture}`}
-            alt=""
-          />
+          <ShowImage
+            image={currentRoom.user.profilePicture}
+            show={message.picture}
+          ></ShowImage>
+
           <Popup
             content={
               dayjs(message.createdAt).fromNow() + ", seen:" + message.read
@@ -146,10 +146,10 @@ const MessengerMessages = ({
     } else {
       return (
         <li className="sent">
-          <img
-            src={`/images/profile-picture/100x100/${currentRoom.user.profilePicture}`}
-            alt=""
-          />
+          <ShowImage
+            image={currentRoom.user.profilePicture}
+            show={message.picture}
+          ></ShowImage>
           <Popup
             content={
               dayjs(message.createdAt).fromNow() + ", seen:" + message.read
@@ -160,7 +160,7 @@ const MessengerMessages = ({
                   borderRadius: "3%",
                   objectFit: "cover",
                   width: "40%",
-                  height: "20%"
+                  height: "20%",
                 }}
                 src={`/images/chat-images/${message.photo}`}
                 alt=""

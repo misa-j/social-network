@@ -1792,6 +1792,7 @@ body {
 #frame .content .messages ul li.sent img {
   margin: 6px 8px 0 0;
 }
+
 #frame .content .messages ul li.sent p {
   background: #f5f5f5;
   word-wrap: break-word;
@@ -1801,6 +1802,17 @@ body {
   float: right;
   margin: 6px 0 0 8px;
 }
+
+#frame .content .messages ul li.replies div {
+  float: right;
+  margin: 6px 0 0 30px;
+}
+
+#frame .content .messages ul li.sent div {
+  margin: 6px 30px 0 0;
+  float: left;
+}
+
 #frame .content .messages ul li.replies p {
   background: #435f7a;
   color: #f5f5f5;

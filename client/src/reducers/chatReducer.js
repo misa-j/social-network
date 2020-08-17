@@ -8,9 +8,9 @@ export function chat(
     roomId: null,
     callingModal: false,
     answeringModal: {
-      isOpen: false
+      isOpen: false,
     },
-    searchedRooms: null
+    searchedRooms: null,
   },
   action
 ) {
@@ -21,12 +21,12 @@ export function chat(
           ...state,
           [action.roomId]: {
             ...state[action.roomId],
-            isTyping: true
-          }
+            isTyping: true,
+          },
         };
       } else {
         return {
-          ...state
+          ...state,
         };
       }
     case chatConstants.STOPPED_TYPING:
@@ -35,19 +35,19 @@ export function chat(
           ...state,
           [action.roomId]: {
             ...state[action.roomId],
-            isTyping: false
-          }
+            isTyping: false,
+          },
         };
       } else {
         return {
-          ...state
+          ...state,
         };
       }
     case chatConstants.CHANGE_ROOM:
       return {
         ...state,
         currentRoom: action.room,
-        roomId: action.room._id
+        roomId: action.room._id,
       };
     case chatConstants.INIT_MESSAGE_ARRAY:
       if (!state[action.roomId]) {
@@ -57,158 +57,195 @@ export function chat(
             messages: [],
             initialMessagesFetchig: false,
             messageFetching: false,
-            isTyping: false
-          }
+            isTyping: false,
+          },
         };
       } else {
         return {
-          ...state
+          ...state,
         };
       }
 
     case chatConstants.GET_ROOMS_REQUEST:
       return {
         ...state,
-        roomsFetching: true
+        roomsFetching: true,
       };
     case chatConstants.GET_ROOMS_SUCCESS:
       return {
         ...state,
         rooms: action.rooms,
-        roomsFetching: false
+        roomsFetching: false,
       };
     case chatConstants.ADD_NEW_ROOM:
       return {
         ...state,
-        rooms: [action.room, ...state.rooms]
+        rooms: [action.room, ...state.rooms],
       };
     case chatConstants.GET_MESSAGES_INITIAL_REQUEST:
       return {
         ...state,
         [action.roomId]: {
           ...state[action.roomId],
-          initialMessagesFetchig: true
-        }
+          initialMessagesFetchig: true,
+        },
       };
     case chatConstants.GET_MESSAGES_REQUEST:
       return {
         ...state,
         [action.roomId]: {
           ...state[action.roomId],
-          messageFetching: true
-        }
+          messageFetching: true,
+        },
       };
     case chatConstants.GET_MESSAGES_SUCCESS:
+      let messages = action.data.messages;
+      let prev = null;
+
+      for (let i = 0; i < messages.length; i++) {
+        if (prev !== messages[i].sender) {
+          messages[i].picture = true;
+          prev = messages[i].sender;
+        } else {
+          messages[i].picture = false;
+        }
+      }
+
       return {
         ...state,
         [action.data.roomId]: {
           ...state[action.data.roomId],
           messages: [
             ...action.data.messages,
-            ...state[action.data.roomId].messages
+            ...state[action.data.roomId].messages,
           ],
           messageFetching: false,
-          initialMessagesFetchig: false
-        }
+          initialMessagesFetchig: false,
+        },
       };
     case chatConstants.SEND_MESSAGE_REQUEST:
       let currentRoom = state.currentRoom;
       if (currentRoom && state.currentRoom._id === action.message.roomId) {
         currentRoom = {
           ...state.currentRoom,
-          messages: state.currentRoom.messages + 1
+          messages: state.currentRoom.messages + 1,
         };
       }
+
       if (state[action.message.roomId]) {
+        const messages = state[action.message.roomId].messages;
+        if (!messages.length) action.message.picture = true;
+        else if (messages[messages.length - 1].sender !== action.message.sender)
+          action.message.picture = true;
+        else action.message.picture = false;
+
         return {
           ...state,
           [action.message.roomId]: {
             ...state[action.message.roomId],
-            messages: [...state[action.message.roomId].messages, action.message]
+            messages: [
+              ...state[action.message.roomId].messages,
+              action.message,
+            ],
           },
-          rooms: state.rooms.map(room => {
+          rooms: state.rooms.map((room) => {
             if (room._id === action.message.roomId) {
               return {
                 ...room,
-                messages: room.messages + 1
+                messages: room.messages + 1,
               };
             } else {
               return room;
             }
           }),
-          currentRoom
+          currentRoom,
         };
       } else {
         return {
-          ...state
+          ...state,
         };
       }
     case chatConstants.SEND_MESSAGE_SUCCESS:
       if (state[action.message.roomId]) {
         const index = state.rooms.findIndex(
-          room => room._id === action.message.roomId
+          (room) => room._id === action.message.roomId
         );
         const newRoom = state.rooms[index];
+
+        const messages = state[action.message.roomId].messages;
+        if (messages.length <= 1) action.message.picture = true;
+        else if (messages[messages.length - 2].sender !== action.message.sender)
+          action.message.picture = true;
+        else action.message.picture = false;
 
         return {
           ...state,
           [action.message.roomId]: {
             ...state[action.message.roomId],
-            messages: state[action.message.roomId].messages.map(message => {
+            messages: state[action.message.roomId].messages.map((message) => {
               if (message.uuid === action.message.uuid) {
                 return action.message;
               } else {
                 return message;
               }
-            })
+            }),
           },
           rooms: [
             {
               ...newRoom,
               //messages: newRoom.messages + 1,
-              lastMessage: [action.message]
+              lastMessage: [action.message],
             },
-            ...state.rooms.filter(room => room._id !== action.message.roomId)
-          ]
+            ...state.rooms.filter((room) => room._id !== action.message.roomId),
+          ],
         };
       } else {
         return {
-          ...state
+          ...state,
         };
       }
     case chatConstants.NEW_MESSAGE:
       if (state[action.message.roomId]) {
         const index = state.rooms.findIndex(
-          room => room._id === action.message.roomId
+          (room) => room._id === action.message.roomId
         );
         const newRoom = state.rooms[index];
+
+        const messages = state[action.message.roomId].messages;
+        if (!messages.length) action.message.picture = true;
+        else if (messages[messages.length - 1].sender !== action.message.sender)
+          action.message.picture = true;
+        else action.message.picture = false;
 
         let currentRoom = state.currentRoom;
         if (currentRoom && state.currentRoom._id === action.message.roomId) {
           currentRoom = {
             ...state.currentRoom,
-            messages: state.currentRoom.messages + 1
+            messages: state.currentRoom.messages + 1,
           };
         }
         return {
           ...state,
           [action.message.roomId]: {
             ...state[action.message.roomId],
-            messages: [...state[action.message.roomId].messages, action.message]
+            messages: [
+              ...state[action.message.roomId].messages,
+              action.message,
+            ],
           },
           currentRoom,
           rooms: [
             {
               ...newRoom,
               messages: newRoom.messages + 1,
-              lastMessage: [action.message]
+              lastMessage: [action.message],
             },
-            ...state.rooms.filter(room => room._id !== action.message.roomId)
-          ]
+            ...state.rooms.filter((room) => room._id !== action.message.roomId),
+          ],
         };
       } else {
         return {
-          ...state
+          ...state,
         };
       }
     case chatConstants.READ_MESSAGES:
@@ -216,40 +253,40 @@ export function chat(
         ...state,
         [action.roomId]: {
           ...state[action.roomId],
-          messages: state[action.roomId].messages.map(message => {
+          messages: state[action.roomId].messages.map((message) => {
             if (action.messageIds.includes(message._id)) {
               return {
                 ...message,
-                read: true
+                read: true,
               };
             } else {
               return {
-                ...message
+                ...message,
               };
             }
-          })
-        }
+          }),
+        },
       };
     case chatConstants.CHANGE_ACTIVITY_STATUS:
       return {
         ...state,
-        rooms: state.rooms.map(room => {
+        rooms: state.rooms.map((room) => {
           if (room.members[0]._id === action.user.user) {
             room.members[0].activityStatus = action.user.activityStatus;
             return {
-              ...room
+              ...room,
             };
           } else if (room.members[1]._id === action.user.user) {
             room.members[1].activityStatus = action.user.activityStatus;
             return {
-              ...room
+              ...room,
             };
           } else {
             return {
-              ...room
+              ...room,
             };
           }
-        })
+        }),
       };
     case chatConstants.RECEIVE_READ_MESSAGES:
       if (state[action.data.roomId]) {
@@ -257,34 +294,34 @@ export function chat(
           ...state,
           [action.data.roomId]: {
             ...state[action.data.roomId],
-            messages: state[action.data.roomId].messages.map(message => {
+            messages: state[action.data.roomId].messages.map((message) => {
               if (action.data.messageIds.includes(message._id)) {
                 return {
                   ...message,
-                  read: true
+                  read: true,
                 };
               } else {
                 return {
-                  ...message
+                  ...message,
                 };
               }
-            })
-          }
+            }),
+          },
         };
       } else {
         return {
-          ...state
+          ...state,
         };
       }
     case chatConstants.OPEN_CALLING_MODAL:
       return {
         ...state,
-        callingModal: true
+        callingModal: true,
       };
     case chatConstants.CLOSE_CALLING_MODAL:
       return {
         ...state,
-        callingModal: false
+        callingModal: false,
       };
     case chatConstants.OPEN_ANSWERING_MODAL:
       return {
@@ -294,17 +331,17 @@ export function chat(
           isOpen: true,
           webRtc: {
             ...state.webRtc,
-            ...action.data.webRtc
+            ...action.data.webRtc,
           },
           caller: {
             ...state.caller,
-            ...action.data.caller
+            ...action.data.caller,
           },
           room: {
             ...state.room,
-            ...action.data.room
-          }
-        }
+            ...action.data.room,
+          },
+        },
       };
     case chatConstants.CLOSE_ANSWERING_MODAL:
       return {
@@ -314,13 +351,13 @@ export function chat(
           isOpen: false,
           webRtc: {},
           caller: {},
-          room: {}
-        }
+          room: {},
+        },
       };
     case chatConstants.SEARCH_USERS:
       return {
         ...state,
-        searchedRooms: action.rooms
+        searchedRooms: action.rooms,
       };
     default:
       return state;
