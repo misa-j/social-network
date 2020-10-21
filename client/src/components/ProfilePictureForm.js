@@ -4,7 +4,7 @@ import "react-image-crop/dist/ReactCrop.css";
 import {
   image64toCanvasRef,
   extractImageFileExtensionFromBase64,
-  base64StringtoFile
+  base64StringtoFile,
 } from "../reusable/ReusableUtils";
 import { Button } from "semantic-ui-react";
 import { postActions } from "../actions/postActions";
@@ -14,7 +14,7 @@ import { alertActions } from "../actions/alertActions";
 const imageMaxSize = 10000000; // bytes
 const acceptedFileTypes =
   "image/x-png, image/png, image/jpg, image/jpeg, image/gif";
-const acceptedFileTypesArray = acceptedFileTypes.split(",").map(item => {
+const acceptedFileTypesArray = acceptedFileTypes.split(",").map((item) => {
   return item.trim();
 });
 
@@ -24,8 +24,8 @@ const initialState = {
   imgSrcExt: null,
   imageUploadEndpoint: "",
   crop: {
-    aspect: 1
-  }
+    aspect: 1,
+  },
 };
 
 class ProfilePictureForm extends PureComponent {
@@ -33,13 +33,13 @@ class ProfilePictureForm extends PureComponent {
   fileInputRef = React.createRef();
   state = initialState;
 
-  handleChange = e => {
+  handleChange = (e) => {
     this.setState({
-      description: e.target.value
+      description: e.target.value,
     });
   };
 
-  handleOnCropChange = crop => {
+  handleOnCropChange = (crop) => {
     this.setState({ crop: crop });
   };
 
@@ -47,9 +47,10 @@ class ProfilePictureForm extends PureComponent {
     const canvasRef = this.imagePreviewCanvasRef.current;
     const { imgSrc } = this.state;
     image64toCanvasRef(canvasRef, imgSrc, pixelCrop);
+    this.setState({ cropped: true });
   };
 
-  handleUpload = event => {
+  handleUpload = (event) => {
     event.preventDefault();
     const { imgSrc } = this.state;
     if (imgSrc) {
@@ -69,7 +70,7 @@ class ProfilePictureForm extends PureComponent {
     }
   };
 
-  verifyFile = files => {
+  verifyFile = (files) => {
     if (files && files.length > 0) {
       const currentFile = files[0];
       const currentFileType = currentFile.type;
@@ -99,7 +100,7 @@ class ProfilePictureForm extends PureComponent {
     }
   };
 
-  handleFileSelect = event => {
+  handleFileSelect = (event) => {
     const files = event.target.files;
     if (files && files.length > 0) {
       const isVerified = this.verifyFile(files);
@@ -114,7 +115,7 @@ class ProfilePictureForm extends PureComponent {
             const myResult = myFileItemReader.result;
             this.setState({
               imgSrc: myResult,
-              imgSrcExt: extractImageFileExtensionFromBase64(myResult)
+              imgSrcExt: extractImageFileExtensionFromBase64(myResult),
             });
           },
           false
@@ -126,7 +127,7 @@ class ProfilePictureForm extends PureComponent {
   };
 
   render() {
-    const { imgSrc } = this.state;
+    const { imgSrc, cropped } = this.state;
     return (
       <div>
         {imgSrc !== null ? (
@@ -152,9 +153,12 @@ class ProfilePictureForm extends PureComponent {
               onComplete={this.handleOnCropComplete}
               onChange={this.handleOnCropChange}
             />
-            <Button primary fluid onClick={this.handleUpload}>
-              Upload
-            </Button>
+            {cropped ? (
+              <Button primary fluid onClick={this.handleUpload}>
+                Upload
+              </Button>
+            ) : null}
+
             <canvas
               style={{ display: "none" }}
               ref={this.imagePreviewCanvasRef}
