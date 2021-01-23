@@ -6,10 +6,10 @@ const ChatRoom = new mongoose.Schema({
   roomName: { type: String, default: "" },
   lastActive: { type: Date, default: Date.now },
   createdAt: { type: Date, default: Date.now },
-  messages: { type: Number, default: 0 }
+  messages: { type: Number, default: 0 },
 });
 
-ChatRoom.statics.getRooms = function(userId) {
+ChatRoom.statics.getRooms = function (userId) {
   return this.aggregate([
     // Lookup Stores and populate their reviews
     { $match: { members: { $in: [userId] } } },
@@ -18,8 +18,8 @@ ChatRoom.statics.getRooms = function(userId) {
         from: "users",
         localField: "members",
         foreignField: "_id",
-        as: "members"
-      }
+        as: "members",
+      },
     },
     {
       $lookup: {
@@ -29,13 +29,13 @@ ChatRoom.statics.getRooms = function(userId) {
         pipeline: [
           {
             $match: {
-              $expr: { $eq: ["$roomId", "$$indicator_id"] }
-            }
+              $expr: { $eq: ["$roomId", "$$indicator_id"] },
+            },
           },
           { $sort: { createdAt: -1 } }, // add sort if needed (for example, if you want first 100 comments by creation date)
-          { $limit: 1 }
-        ]
-      }
+          { $limit: 1 },
+        ],
+      },
     },
     // filter for only items that have 2 or more reviews
     //{ $match: { "messages.1": { $exists: true } } },
@@ -51,12 +51,12 @@ ChatRoom.statics.getRooms = function(userId) {
         messages: 1,
         roomName: 1,
         createdAt: 1,
-        lastMessage: 1
+        lastMessage: 1,
         //averageRating: { $avg: { $size: "$messages" } }
-      }
+      },
     },
     // sort it by our new field, highest reviews first
-    { $sort: { "lastMessage.createdAt": -1 } }
+    { $sort: { "lastMessage.createdAt": -1 } },
     // limit to at most 10
   ]);
 };

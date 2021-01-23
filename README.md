@@ -1,10 +1,10 @@
 # social-network
 
-Mini social network that I made as my first MERN stack project.
+Mini social network that I made as my first web app project.
 
 ## Demo
 
-[social-network](https://social-network.site/login)
+[social-network](https://social-network.link/login)
 
 ## Screenshots
 
