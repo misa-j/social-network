@@ -19,7 +19,7 @@ class NewUsersList extends Component {
   fetchMoreUsers = () => {
     const {
       dispatch,
-      newUsers: { users, fetchingNewUsers }
+      newUsers: { users, fetchingNewUsers },
     } = this.props;
 
     if (!fetchingNewUsers) {
@@ -31,7 +31,7 @@ class NewUsersList extends Component {
   render() {
     const { newUsers, username } = this.props;
 
-    const users = newUsers.users.map(user => {
+    const users = newUsers.users.map((user) => {
       return (
         <List.Item key={user._id}>
           <Image
@@ -61,6 +61,13 @@ class NewUsersList extends Component {
               <Loader />
             </Dimmer>
           ) : null}
+          {
+            <List.Item>
+              <List.Content>
+                <List.Header> all users: {newUsers.usersCount}</List.Header>
+              </List.Content>
+            </List.Item>
+          }
           {users}
           {newUsers.usersCount - newUsers.users.length !== 0 ? (
             <Button
@@ -77,9 +84,9 @@ class NewUsersList extends Component {
   }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   newUsers: state.newUsers,
-  username: state.user.data.username
+  username: state.user.data.username,
 });
 
 const connectedNewUsersList = connect(mapStateToProps)(NewUsersList);
