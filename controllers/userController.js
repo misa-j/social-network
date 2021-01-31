@@ -508,11 +508,12 @@ exports.getUserData = (req, res, next) => {
           email: 1,
           bio: 1,
           profilePicture: 1,
+          followingIds: { $arrayElemAt: ["$followings.following.user", 0] },
           followings: {
-            $size: { $arrayElemAt: ["$followings.following", 0] },
+            $size: { $arrayElemAt: ["$followings.following.user", 0] },
           },
           followers: {
-            $size: { $arrayElemAt: ["$followers.followers", 0] },
+            $size: { $arrayElemAt: ["$followers.followers.user", 0] },
           },
           postLikes: "$postLikes.post",
           commentLikes: "$commentLikes.comment",
@@ -582,6 +583,7 @@ exports.getUserData = (req, res, next) => {
         messagesCount: values[3],
         allNotifications: values[4],
       };
+
       req.body.user = data;
 
       next();
@@ -974,7 +976,6 @@ exports.getFollowings = (req, res, next) => {
 exports.getUserProfileFollowers = (req, res) => {
   Followers.find({ user: mongoose.Types.ObjectId(req.body.userId) })
     .populate("followers.user", "username profilePicture ")
-    .select("followers.user")
     .then((users) => {
       return res.status(200).json({ users });
     })
@@ -985,7 +986,6 @@ exports.getUserProfileFollowings = (req, res) => {
   Following.find({ user: mongoose.Types.ObjectId(req.body.userId) })
 
     .populate("following.user", "username profilePicture ")
-    .select("following.user.email")
     .then((users) => {
       return res.status(200).json({ users });
     })

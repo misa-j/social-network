@@ -49,6 +49,7 @@ describe("/api/user/getUserData", () => {
           "profilePicture",
           "followings",
           "followers",
+          "followingIds",
           "postLikes",
           "commentLikes",
           "commentReplyLikes",
