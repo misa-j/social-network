@@ -4,7 +4,7 @@ Mini social network that I made as my first web app project.
 
 ## Demo
 
-[social-network](https://social-network.link/login)
+[social-network](http://46.101.189.55/login)
 
 ## Screenshots
 
