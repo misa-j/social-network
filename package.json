@@ -28,7 +28,7 @@
     "multer": "^1.4.1",
     "nodemailer": "^6.4.2",
     "nodemailer-express-handlebars": "^3.1.0",
-    "socket.io": "^2.2.0",
+    "socket.io": "^2.5.0",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
