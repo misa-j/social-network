@@ -28,7 +28,7 @@
     "react-redux": "^6.0.1",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
-    "react-scripts": "2.1.5",
+    "react-scripts": "5.0.1",
     "react-scroll": "^1.7.14",
     "redux": "^4.0.1",
     "redux-logger": "^3.0.6",
