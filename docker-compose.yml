@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo:4.4
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    volumes:
+      - ./public:/app/public
+
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    volumes:
+      - ./public:/usr/share/nginx/html/public 
+
+volumes:
+  mongo-data:

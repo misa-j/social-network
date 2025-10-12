@@ -80,19 +80,24 @@ TEST_DATABASE="testing db"
 3. Go into `client/src/_services/socketService.js` and replace
 
 ```
-window.location.hostname
+"/"
 ```
 
-with your local IP address on port 5000 eg.
+with your local IP address on port 5000
 
 ```
-192.168.0.14:5000
+127.0.0.1:5000
 ```
 
 4. Run project
 
 ```
 npm run dev
+```
+
+## Run with Docker Compose
+```
+docker compose up --build
 ```
 
 ## Contribute
