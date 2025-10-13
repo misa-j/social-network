@@ -116,4 +116,6 @@ router.post(
 
 router.post("/delete/", checkAuth, userController.deleteUser);
 
+router.get("/status", userController.healthStatus);
+
 module.exports = router;

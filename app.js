@@ -102,10 +102,7 @@ if (process.env.NODE_ENV === "production") {
 } else {
   app.use(logger("dev"));
 }
-app.use(express.static("public"));
-app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "public", "index.html"));
-});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -117,6 +114,11 @@ app.use("/api/chat/", chatRouter);
 
 app.get("/auth/reset/password/:jwt", function (req, res) {
   return res.status(404).json({ message: "go to port 3000" });
+});
+
+app.use(express.static("public"));
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "public", "index.html"));
 });
 
 // catch 404 and forward to error handler

@@ -1063,3 +1063,7 @@ exports.changeStatus = (userId, clients, io) => {
       .catch((err) => console.log(err.message));
   }
 };
+
+exports.healthStatus = (req, res) => {
+  return res.status(200).json({ message: "Ok" });
+};
