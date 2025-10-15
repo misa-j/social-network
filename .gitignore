@@ -4,6 +4,8 @@ variables.env
 *.log
 backend-task.json
 frontend-task.json
+mongo-task.json
+backend-with-mongo.json
 
 client/node_modules
 client/build

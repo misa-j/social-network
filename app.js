@@ -116,6 +116,7 @@ app.get("/auth/reset/password/:jwt", function (req, res) {
   return res.status(404).json({ message: "go to port 3000" });
 });
 
+app.use("/images", express.static(path.join(__dirname, "public", "images")));
 app.use(express.static("public"));
 app.get("*", (req, res) => {
   res.sendFile(path.resolve(__dirname, "public", "index.html"));
